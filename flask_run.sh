@@ -6,9 +6,9 @@
 # pour tester votre application, lancer la commande dans un terminal : bash flask_run.sh
 
 HOST=localhost
-LOGIN=kvadeboi
+LOGIN=maeva
 PASSWORD=mdp
-DATABASE=BDD_kvadeboi
+DATABASE=BDD_maeva
 
 sed -i "s/host=.*/host=\"${HOST}\",/g" connexion_db.py
 sed -i "s/user=.*/user=\"${LOGIN}\",/g" connexion_db.py

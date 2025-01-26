@@ -1,1 +1,1 @@
-mysql --user=kvadeboi --password=mdp --host=localhost BDD_kvadeboi
+mysql --user=maeva --password=mdp --host=localhost BDD_maeva

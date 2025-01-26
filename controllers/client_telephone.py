@@ -41,18 +41,13 @@ def client_telephone_show():                                 # remplace client_i
 
     # pour le filtre
     types_telephone = []
-    sql='''SELECT ligne_panier.telephone_id,
-            ligne_panier.quantite,
-            telephone.prix_telephone AS prix,
-            (ligne_panier.quantite * telephone.prix_telephone) AS total_ligne
-        FROM ligne_panier
-        JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
-        WHERE ligne_panier.utilisateur_id = %s
-        ORDER BY ligne_panier.telephone_id;'''
-
-    mycursor.execute(sql, (id_client))
-    type_telephone = mycursor.fetchall()
-    type_telephone = type_telephone
+    sql = '''
+    SELECT id_type_telephone, libelle_type_telephone as libelle
+    FROM type_telephone 
+    ORDER BY libelle_type_telephone;
+    '''
+    mycursor.execute(sql)
+    types_telephone = mycursor.fetchall()
 
     telephones_panier = []
 
