@@ -95,15 +95,12 @@ INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_a
     'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
     'ROLE_client','client2','1');
 
-CREATE TABLE ligne_panier (
-    utilisateur_id INT,
-    telephone_id INT,
-    date_ajout DATETIME,
-    quantite INT,
-    PRIMARY KEY (utilisateur_id, telephone_id, date_ajout),
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
-    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
-);
+
+
+
+
+
+
 
 
 
@@ -115,14 +112,6 @@ CREATE TABLE etat (
 );
 
 INSERT INTO etat(libelle) VALUES ('en cours de traitement'), ('expédié'), ('validé');
-
-CREATE TABLE utilisateur (
-    id_utilisateur INT AUTO_INCREMENT,
-    nom VARCHAR(255),
-    email VARCHAR(255) UNIQUE,
-    mot_de_passe VARCHAR(255),
-    PRIMARY KEY (id_utilisateur)
-);
 
 CREATE TABLE adresse (
     id_adresse INT AUTO_INCREMENT,
@@ -152,19 +141,31 @@ CREATE TABLE commande (
 
 CREATE TABLE ligne_commande (
     commande_id int(11),
-    stylo_id int(11),
-    prix decimal(10,2),
+    telephone_id int(11),
+    prix decimal(15,2),
     quantite int(11),
-    PRIMARY KEY (commande_id, stylo_id),
+    PRIMARY KEY (commande_id, telephone_id),
     FOREIGN KEY (commande_id) REFERENCES commande(id_commande),
-    FOREIGN KEY (stylo_id) REFERENCES stylo(id_stylo)
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
 );
 
-CREATE TABLE panier (
+CREATE TABLE ligne_panier (
     utilisateur_id INT,
-    stylo_id INT,
+    telephone_id INT,
+    date_ajout DATETIME,
     quantite INT,
-    PRIMARY KEY (utilisateur_id, stylo_id),
+    PRIMARY KEY (utilisateur_id, telephone_id, date_ajout),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
-    FOREIGN KEY (stylo_id) REFERENCES stylo(id_stylo)
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
+);
+
+CREATE TABLE paiement (
+    id_paiement INT AUTO_INCREMENT,
+    commande_id INT,
+    montant DECIMAL(15,2),
+    date_paiement DATETIME,
+    methode VARCHAR(50),
+    statut VARCHAR(50),
+    PRIMARY KEY (id_paiement),
+    FOREIGN KEY (commande_id) REFERENCES commande(id_commande)
 );
