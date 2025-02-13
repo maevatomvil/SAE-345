@@ -104,3 +104,67 @@ CREATE TABLE ligne_panier (
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
     FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
 );
+
+
+
+
+CREATE TABLE etat (
+    id_etat int(11) NOT NULL AUTO_INCREMENT,
+    libelle varchar(255),
+    PRIMARY KEY (id_etat)
+);
+
+INSERT INTO etat(libelle) VALUES ('en cours de traitement'), ('expédié'), ('validé');
+
+CREATE TABLE utilisateur (
+    id_utilisateur INT AUTO_INCREMENT,
+    nom VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    mot_de_passe VARCHAR(255),
+    PRIMARY KEY (id_utilisateur)
+);
+
+CREATE TABLE adresse (
+    id_adresse INT AUTO_INCREMENT,
+    utilisateur_id INT,
+    rue VARCHAR(255),
+    ville VARCHAR(100),
+    code_postal VARCHAR(20),
+    pays VARCHAR(100),
+    type_adresse ENUM('livraison', 'facturation'),
+    PRIMARY KEY (id_adresse),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+);
+
+CREATE TABLE commande (
+    id_commande INT AUTO_INCREMENT,
+    date_achat DATETIME,
+    etat_id INT NOT NULL,
+    utilisateur_id INT NOT NULL,
+    adresse_livraison_id INT,
+    adresse_facturation_id INT,
+    PRIMARY KEY (id_commande),
+    FOREIGN KEY (etat_id) REFERENCES etat(id_etat),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (adresse_livraison_id) REFERENCES adresse(id_adresse),
+    FOREIGN KEY (adresse_facturation_id) REFERENCES adresse(id_adresse)
+);
+
+CREATE TABLE ligne_commande (
+    commande_id int(11),
+    stylo_id int(11),
+    prix decimal(10,2),
+    quantite int(11),
+    PRIMARY KEY (commande_id, stylo_id),
+    FOREIGN KEY (commande_id) REFERENCES commande(id_commande),
+    FOREIGN KEY (stylo_id) REFERENCES stylo(id_stylo)
+);
+
+CREATE TABLE panier (
+    utilisateur_id INT,
+    stylo_id INT,
+    quantite INT,
+    PRIMARY KEY (utilisateur_id, stylo_id),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (stylo_id) REFERENCES stylo(id_stylo)
+);
