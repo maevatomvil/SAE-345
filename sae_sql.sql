@@ -1,4 +1,3 @@
--- Suppression des tables si elles existent
 DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS telephone;
 DROP TABLE IF EXISTS type_telephone;
@@ -14,7 +13,6 @@ DROP TABLE IF EXISTS declinaison_telephone;
 DROP TABLE IF EXISTS taille;
 DROP TABLE IF EXISTS etat;
 
--- Création des tables principales
 CREATE TABLE utilisateur (
     id_utilisateur INT AUTO_INCREMENT,
     login VARCHAR(50),
@@ -32,7 +30,7 @@ CREATE TABLE adresse (
     code_postal VARCHAR(10),
     ville VARCHAR(100),
     id_utilisateur INT,
-    date_utilisation DATETIME,  -- Ajout de date_utilisation
+    date_utilisation DATETIME, 
     PRIMARY KEY(id_adresse),
     FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
@@ -42,7 +40,7 @@ CREATE TABLE commande (
     date_achat DATETIME,
     id_adresse INT,
     id_utilisateur INT,
-    id_etat INT,  -- Ajout de la clé étrangère id_etat
+    id_etat INT,  
     PRIMARY KEY(id_commande),
     FOREIGN KEY (id_adresse) REFERENCES adresse(id_adresse),
     FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
@@ -52,7 +50,7 @@ CREATE TABLE commande (
 CREATE TABLE couleur (
     id_couleur INT AUTO_INCREMENT,
     libelle_couleur VARCHAR(50) NOT NULL,
-    code_couleur VARCHAR(10) NOT NULL,  -- Ajout de code_couleur
+    code_couleur VARCHAR(10) NOT NULL,  
     PRIMARY KEY(id_couleur),
     UNIQUE(libelle_couleur)
 );
