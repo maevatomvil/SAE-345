@@ -128,6 +128,38 @@ CREATE TABLE etat (
 );
 
 
+-- Insertion des utilisateurs
+INSERT INTO utilisateur (login, email, password, role, nom, est_actif) VALUES
+    ('admin', 'admin@admin.fr',
+    'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
+    'ROLE_admin', 'admin', 1),
+    ('client', 'client@client.fr',
+    'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
+    'ROLE_client', 'client', 1),
+    ('client2', 'client2@client2.fr',
+    'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
+    'ROLE_client', 'client2', 1);
+
+-- Insertion des couleurs
+INSERT INTO couleur (libelle_couleur, code_couleur) VALUES
+    ('Blanc', '#FFFFFF'),
+    ('Bleu', '#0000FF'),
+    ('Noir', '#000000'),
+    ('Rouge', '#FF0000'),
+    ('Or', '#FFD700'),
+    ('Jaune', '#FFFF00'),
+    ('Rose', '#FFC0CB'),
+    ('Titan', '#BEBEBE'),
+    ('Vert', '#008000'),
+    ('Argent', '#C0C0C0'),
+    ('Violet', '#800080');
+
+-- Insertion des types de téléphone
+INSERT INTO type_telephone (libelle_type_telephone) VALUES
+    ('Standard'),
+    ('Mini');
+
+-- Insertion des téléphones
 INSERT INTO telephone (nom_telephone, poids, taille, prix_telephone, couleur_id, fournisseur, marque, type_telephone_id, stock, image) VALUES
     ('iPhone 13 128Go', 174, 6.1, 909.00, 10, 'Apple Store', 'Apple', 2, 45, 'iphone13blanc.jpg'),
     ('iPhone 13 256Go', 174, 6.1, 1029.00, 2, 'Apple Store', 'Apple', 1, 32, 'iphone13bleu.jpg'),
@@ -147,24 +179,51 @@ INSERT INTO telephone (nom_telephone, poids, taille, prix_telephone, couleur_id,
     ('iPhone 16 Pro 512Go', 195, 6.1, 1649.00, 3, 'Apple Store', 'Apple', 1, 31, 'iphone16proargent.jpg'),
     ('iPhone 16 Pro Max 256Go', 225, 6.7, 1649.00, 1, 'Apple Store', 'Apple', 1, 40, 'iphone16promaxnoir.jpg');
 
-INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
-    (1,'admin','admin@admin.fr',
-    'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
-    'ROLE_admin','admin','1'),
-    (2,'client','client@client.fr',
-    'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
-    'ROLE_client','client','1'),
-    (3,'client2','client2@client2.fr',
-    'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
-    'ROLE_client','client2','1');
+-- Insertion des commandes
+INSERT INTO commande (date_achat, id_adresse, id_utilisateur, id_etat) VALUES
+    ('2025-02-01 14:30:00', 1, 1, 2),
+    ('2025-02-05 09:15:00', 2, 2, 1),
+    ('2025-02-10 18:45:00', 3, 3, 3);
 
+-- Insertion des lignes de commande
+INSERT INTO ligne_commande (id_commande, id_telephone, quantite, prix_unitaire) VALUES
+    (1, 1, 2, 909.00),
+    (1, 4, 1, 809.00),
+    (2, 6, 3, 1199.00),
+    (3, 9, 1, 1099.00),
+    (3, 12, 2, 1449.00);
 
+-- Insertion des états de commande
+INSERT INTO etat (libelle_etat) VALUES
+    ('En cours'),
+    ('Expédiée'),
+    ('Livrée');
 
+-- Insertion des déclinaisons de téléphone
+INSERT INTO declinaison_telephone (id_telephone, id_couleur) VALUES
+    (1, 10),
+    (2, 2),
+    (3, 9),
+    (4, 1),
+    (5, 6),
+    (6, 4),
+    (7, 11),
+    (8, 5);
 
+-- Insertion de l'historique des consultations
+INSERT INTO historique (id_utilisateur, id_telephone, date_consultation) VALUES
+    (1, 1, '2025-01-01 12:00:00'),
+    (2, 3, '2025-01-05 16:30:00'),
+    (3, 5, '2025-01-10 09:00:00');
 
+-- Insertion des notes
+INSERT INTO note (id_utilisateur, id_telephone, note) VALUES
+    (1, 1, 5),
+    (2, 3, 4),
+    (3, 5, 3);
 
-
-
-
-
-
+-- Insertion des commentaires
+INSERT INTO commentaire (id_utilisateur, id_telephone, texte, date_publication) VALUES
+    (1, 1, 'Super téléphone !', '2025-02-01 12:00:00'),
+    (2, 3, 'Bon rapport qualité/prix.', '2025-02-05 14:30:00'),
+    (3, 5, 'Un peu cher mais performant.', '2025-02-10 18:00:00');
