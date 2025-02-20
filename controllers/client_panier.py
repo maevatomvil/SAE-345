@@ -16,11 +16,11 @@ def client_panier_add():
     id_telephone = request.form.get('id_telephone')
     quantite = request.form.get('quantite')
 
-    sql = "SELECT * FROM ligne_panier telephone_id=%s AND utilisateur_id=%s"
+    sql = "SELECT * FROM ligne_panier WHERE telephone_id=%s AND utilisateur_id=%s"
     mycursor.execute(sql, (id_telephone, id_client))
     telephone_panier = mycursor.fetchone()
 
-    mycursor.execute("SELECT * FROM telephone WHERE id_telephone=%s", (id_telephone))
+    mycursor.execute("SELECT * FROM telephone WHERE id_telephone=%s", (id_telephone, ))
     telephone = mycursor.fetchone()
 
     if not (telephone_panier is None) and telephone_panier['quantite'] >= 1:
@@ -56,8 +56,6 @@ def client_panier_add():
     #                                , telephone=telephone)
 
 # ajout dans le panier d'un telephone
-
-
     return redirect('/client/telephone/show')
 
 @client_panier.route('/client/panier/delete', methods=['POST'])
