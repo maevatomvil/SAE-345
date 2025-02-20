@@ -1,9 +1,20 @@
+-- Suppression des tables si elles existent
 DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS telephone;
 DROP TABLE IF EXISTS type_telephone;
 DROP TABLE IF EXISTS couleur;
 DROP TABLE IF EXISTS utilisateur;
+DROP TABLE IF EXISTS adresse;
+DROP TABLE IF EXISTS commande;
+DROP TABLE IF EXISTS ligne_commande;
+DROP TABLE IF EXISTS historique;
+DROP TABLE IF EXISTS note;
+DROP TABLE IF EXISTS commentaire;
+DROP TABLE IF EXISTS declinaison_telephone;
+DROP TABLE IF EXISTS taille;
+DROP TABLE IF EXISTS etat;
 
+-- Création des tables principales
 CREATE TABLE utilisateur (
     id_utilisateur INT AUTO_INCREMENT,
     login VARCHAR(50),
@@ -11,13 +22,37 @@ CREATE TABLE utilisateur (
     nom VARCHAR(250),
     password VARCHAR(250),
     role VARCHAR(250),
-    est_actif tinyint(1),
+    est_actif TINYINT(1),
     PRIMARY KEY(id_utilisateur)
+);
+
+CREATE TABLE adresse (
+    id_adresse INT AUTO_INCREMENT,
+    nom VARCHAR(255),
+    code_postal VARCHAR(10),
+    ville VARCHAR(100),
+    id_utilisateur INT,
+    date_utilisation DATETIME,  -- Ajout de date_utilisation
+    PRIMARY KEY(id_adresse),
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
+);
+
+CREATE TABLE commande (
+    id_commande INT AUTO_INCREMENT,
+    date_achat DATETIME,
+    id_adresse INT,
+    id_utilisateur INT,
+    id_etat INT,  -- Ajout de la clé étrangère id_etat
+    PRIMARY KEY(id_commande),
+    FOREIGN KEY (id_adresse) REFERENCES adresse(id_adresse),
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (id_etat) REFERENCES etat(id_etat)
 );
 
 CREATE TABLE couleur (
     id_couleur INT AUTO_INCREMENT,
     libelle_couleur VARCHAR(50) NOT NULL,
+    code_couleur VARCHAR(10) NOT NULL,  -- Ajout de code_couleur
     PRIMARY KEY(id_couleur),
     UNIQUE(libelle_couleur)
 );
@@ -46,24 +81,54 @@ CREATE TABLE telephone (
     FOREIGN KEY (type_telephone_id) REFERENCES type_telephone(id_type_telephone)
 );
 
-INSERT INTO couleur (libelle_couleur) VALUES
-    ('Noir'),
-    ('Bleu'),
-    ('Argent'),
-    ('Rouge'),
-    ('Or'),
-    ('Jaune'),
-    ('Rose'),
-    ('Titane'),
-    ('Vert'),
-    ('Blanc'),
-    ('Violet');
 
-INSERT INTO type_telephone(libelle_type_telephone) VALUES
-    ('Smartphone'),
-    ('Clapet'),
-    ('Touches'),
-    ('Fixe');
+CREATE TABLE ligne_commande (
+    id_commande INT,
+    id_telephone INT,
+    quantite INT,
+    prix_unitaire DECIMAL(15,2),
+    FOREIGN KEY (id_commande) REFERENCES commande(id_commande),
+    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone)
+);
+
+CREATE TABLE declinaison_telephone (
+    id_telephone INT,
+    id_couleur INT,
+    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (id_couleur) REFERENCES couleur(id_couleur)
+);
+
+CREATE TABLE historique (
+    id_utilisateur INT,
+    id_telephone INT,
+    date_consultation DATETIME,
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone)
+);
+
+CREATE TABLE note (
+    id_utilisateur INT,
+    id_telephone INT,
+    note INT CHECK (note BETWEEN 1 AND 5),
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone)
+);
+
+CREATE TABLE commentaire (
+    id_utilisateur INT,
+    id_telephone INT,
+    texte TEXT,
+    date_publication DATETIME,
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone)
+);
+
+CREATE TABLE etat (
+    id_etat INT AUTO_INCREMENT,
+    libelle_etat VARCHAR(50) NOT NULL,
+    PRIMARY KEY(id_etat)
+);
+
 
 INSERT INTO telephone (nom_telephone, poids, taille, prix_telephone, couleur_id, fournisseur, marque, type_telephone_id, stock, image) VALUES
     ('iPhone 13 128Go', 174, 6.1, 909.00, 10, 'Apple Store', 'Apple', 2, 45, 'iphone13blanc.jpg'),
