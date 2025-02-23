@@ -1,4 +1,119 @@
+DROP TABLE IF EXISTS paiement;
+DROP TABLE IF EXISTS commentaire;
+DROP TABLE IF EXISTS note;
+DROP TABLE IF EXISTS historique;
+DROP TABLE IF EXISTS ligne_commande;
+DROP TABLE IF EXISTS commande;
+DROP TABLE IF EXISTS adresse;
 DROP TABLE IF EXISTS ligne_panier;
+DROP TABLE IF EXISTS etat;
+DROP TABLE IF EXISTS declinaison_telephone;
+DROP TABLE IF EXISTS utilisateur;
+DROP TABLE IF EXISTS telephone;
+DROP TABLE IF EXISTS type_telephone;
+DROP TABLE IF EXISTS couleur;
+
+
+CREATE TABLE couleur (
+    id_couleur INT AUTO_INCREMENT,
+    libelle_couleur VARCHAR(50) NOT NULL,
+    PRIMARY KEY(id_couleur),
+    UNIQUE(libelle_couleur)
+);
+
+CREATE TABLE type_telephone (
+    id_type_telephone INT AUTO_INCREMENT,
+    libelle_type_telephone VARCHAR(50) NOT NULL,
+    PRIMARY KEY(id_type_telephone),
+    UNIQUE(libelle_type_telephone)
+);
+
+CREATE TABLE telephone (
+    id_telephone INT AUTO_INCREMENT,
+    nom_telephone VARCHAR(50) NOT NULL,
+    poids INT,
+    taille DECIMAL(2,1),
+    prix_telephone DECIMAL(15,2),
+    couleur_id INT,
+    fournisseur VARCHAR(50) NOT NULL,
+    marque VARCHAR(50) NOT NULL,
+    type_telephone_id INT,
+    stock INT,
+    image VARCHAR(50),
+    PRIMARY KEY(id_telephone),
+    FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur),
+    FOREIGN KEY (type_telephone_id) REFERENCES type_telephone(id_type_telephone)
+);
+
+CREATE TABLE utilisateur (
+    id_utilisateur INT AUTO_INCREMENT,
+    login VARCHAR(50),
+    email VARCHAR(250),
+    nom VARCHAR(250),
+    password VARCHAR(250),
+    role VARCHAR(250),
+    est_actif tinyint(1),
+    PRIMARY KEY(id_utilisateur)
+);
+
+CREATE TABLE declinaison_telephone (
+    telephone_id INT,
+    couleur_id INT,
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur)
+);
+
+CREATE TABLE etat (
+    id_etat int(11) NOT NULL AUTO_INCREMENT,
+    libelle varchar(255),
+    PRIMARY KEY (id_etat)
+);
+
+CREATE TABLE ligne_panier (
+    utilisateur_id INT,
+    telephone_id INT,
+    date_ajout DATETIME,
+    quantite INT,
+    PRIMARY KEY (utilisateur_id, telephone_id, date_ajout),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
+);
+
+CREATE TABLE adresse (
+    id_adresse INT AUTO_INCREMENT,
+    utilisateur_id INT,
+    rue VARCHAR(255),
+    ville VARCHAR(100),
+    code_postal VARCHAR(20),
+    pays VARCHAR(100),
+    type_adresse VARCHAR(50),
+    PRIMARY KEY (id_adresse),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+);
+
+CREATE TABLE commande (
+    id_commande INT AUTO_INCREMENT,
+    date_achat DATETIME,
+    etat_id INT NOT NULL,
+    utilisateur_id INT NOT NULL,
+    adresse_livraison_id INT,
+    adresse_facturation_id INT,
+    PRIMARY KEY (id_commande),
+    FOREIGN KEY (etat_id) REFERENCES etat(id_etat),
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (adresse_livraison_id) REFERENCES adresse(id_adresse),
+    FOREIGN KEY (adresse_facturation_id) REFERENCES adresse(id_adresse)
+);
+
+CREATE TABLE ligne_commande (
+    commande_id int(11),
+    telephone_id int(11),
+    prix decimal(15,2),
+    quantite int(11),
+    PRIMARY KEY (commande_id, telephone_id),
+    FOREIGN KEY (commande_id) REFERENCES commande(id_commande),
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
+);DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS telephone;
 DROP TABLE IF EXISTS type_telephone;
 DROP TABLE IF EXISTS couleur;
@@ -64,102 +179,63 @@ CREATE TABLE type_telephone (
 
 CREATE TABLE telephone (
     id_telephone INT AUTO_INCREMENT,
-    nom_telephone VARCHAR(50) NOT NULL,
-    poids INT,
-    taille DECIMAL(2,1),
-    prix_telephone DECIMAL(15,2),
-    couleur_id INT,
-    fournisseur VARCHAR(50) NOT NULL,
-    marque VARCHAR(50) NOT NULL,
-    type_telephone_id INT,
-    stock INT,
-    image VARCHAR(50),
-    PRIMARY KEY(id_telephone),
-    FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur),
-    FOREIGN KEY (type_telephone_id) REFERENCES type_telephone(id_type_telephone)
-);
 
-
-CREATE TABLE ligne_commande (
-    id_commande INT,
-    id_telephone INT,
-    quantite INT,
-    prix_unitaire DECIMAL(15,2),
-    FOREIGN KEY (id_commande) REFERENCES commande(id_commande),
-    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone)
-);
-
-CREATE TABLE declinaison_telephone (
-    id_telephone INT,
-    id_couleur INT,
-    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone),
-    FOREIGN KEY (id_couleur) REFERENCES couleur(id_couleur)
-);
 
 CREATE TABLE historique (
-    id_utilisateur INT,
-    id_telephone INT,
+    utilisateur_id INT,
+    telephone_id INT,
     date_consultation DATETIME,
-    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
-    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone)
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
 );
 
 CREATE TABLE note (
-    id_utilisateur INT,
-    id_telephone INT,
+    utilisateur_id INT,
+    telephone_id INT,
     note INT CHECK (note BETWEEN 1 AND 5),
-    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
-    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone)
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
 );
 
 CREATE TABLE commentaire (
-    id_utilisateur INT,
-    id_telephone INT,
+    utilisateur_id INT,
+    telephone_id INT,
     texte TEXT,
     date_publication DATETIME,
-    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
-    FOREIGN KEY (id_telephone) REFERENCES telephone(id_telephone)
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
 );
 
-CREATE TABLE etat (
-    id_etat INT AUTO_INCREMENT,
-    libelle_etat VARCHAR(50) NOT NULL,
-    PRIMARY KEY(id_etat)
+CREATE TABLE paiement (
+    id_paiement INT AUTO_INCREMENT,
+    commande_id INT,
+    montant DECIMAL(15,2),
+    date_paiement DATETIME,
+    methode VARCHAR(50),
+    statut VARCHAR(50),
+    PRIMARY KEY (id_paiement),
+    FOREIGN KEY (commande_id) REFERENCES commande(id_commande)
 );
 
+INSERT INTO couleur (libelle_couleur) VALUES
+    ('Noir'),
+    ('Bleu'),
+    ('Argent'),
+    ('Rouge'),
+    ('Or'),
+    ('Jaune'),
+    ('Rose'),
+    ('Titane'),
+    ('Vert'),
+    ('Blanc'),
+    ('Violet');
 
--- Insertion des utilisateurs
-INSERT INTO utilisateur (login, email, password, role, nom, est_actif) VALUES
-    ('admin', 'admin@admin.fr',
-    'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
-    'ROLE_admin', 'admin', 1),
-    ('client', 'client@client.fr',
-    'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
-    'ROLE_client', 'client', 1),
-    ('client2', 'client2@client2.fr',
-    'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
-    'ROLE_client', 'client2', 1);
+INSERT INTO type_telephone(libelle_type_telephone) VALUES
+    ('Smartphone'),
+    ('Clapet'),
+    ('Touches'),
+    ('Fixe');
 
--- Insertion des couleurs
-INSERT INTO couleur (libelle_couleur, code_couleur) VALUES
-    ('Blanc', '#FFFFFF'),
-    ('Bleu', '#0000FF'),
-    ('Noir', '#000000'),
-    ('Rouge', '#FF0000'),
-    ('Or', '#FFD700'),
-    ('Jaune', '#FFFF00'),
-    ('Rose', '#FFC0CB'),
-    ('Titan', '#BEBEBE'),
-    ('Vert', '#008000'),
-    ('Argent', '#C0C0C0'),
-    ('Violet', '#800080');
-
--- Insertion des types de téléphone
-INSERT INTO type_telephone (libelle_type_telephone) VALUES
-    ('Standard'),
-    ('Mini');
-
--- Insertion des téléphones
 INSERT INTO telephone (nom_telephone, poids, taille, prix_telephone, couleur_id, fournisseur, marque, type_telephone_id, stock, image) VALUES
     ('iPhone 13 128Go', 174, 6.1, 909.00, 10, 'Apple Store', 'Apple', 2, 45, 'iphone13blanc.jpg'),
     ('iPhone 13 256Go', 174, 6.1, 1029.00, 2, 'Apple Store', 'Apple', 1, 32, 'iphone13bleu.jpg'),
@@ -179,28 +255,18 @@ INSERT INTO telephone (nom_telephone, poids, taille, prix_telephone, couleur_id,
     ('iPhone 16 Pro 512Go', 195, 6.1, 1649.00, 3, 'Apple Store', 'Apple', 1, 31, 'iphone16proargent.jpg'),
     ('iPhone 16 Pro Max 256Go', 225, 6.7, 1649.00, 1, 'Apple Store', 'Apple', 1, 40, 'iphone16promaxnoir.jpg');
 
--- Insertion des commandes
-INSERT INTO commande (date_achat, id_adresse, id_utilisateur, id_etat) VALUES
-    ('2025-02-01 14:30:00', 1, 1, 2),
-    ('2025-02-05 09:15:00', 2, 2, 1),
-    ('2025-02-10 18:45:00', 3, 3, 3);
+INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
+    (1,'admin','admin@admin.fr',
+    'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
+    'ROLE_admin','admin','1'),
+    (2,'client','client@client.fr',
+    'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
+    'ROLE_client','client','1'),
+    (3,'client2','client2@client2.fr',
+    'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
+    'ROLE_client','client2','1');
 
--- Insertion des lignes de commande
-INSERT INTO ligne_commande (id_commande, id_telephone, quantite, prix_unitaire) VALUES
-    (1, 1, 2, 909.00),
-    (1, 4, 1, 809.00),
-    (2, 6, 3, 1199.00),
-    (3, 9, 1, 1099.00),
-    (3, 12, 2, 1449.00);
-
--- Insertion des états de commande
-INSERT INTO etat (libelle_etat) VALUES
-    ('En cours'),
-    ('Expédiée'),
-    ('Livrée');
-
--- Insertion des déclinaisons de téléphone
-INSERT INTO declinaison_telephone (id_telephone, id_couleur) VALUES
+INSERT INTO declinaison_telephone (telephone_id, couleur_id) VALUES
     (1, 10),
     (2, 2),
     (3, 9),
@@ -210,20 +276,50 @@ INSERT INTO declinaison_telephone (id_telephone, id_couleur) VALUES
     (7, 11),
     (8, 5);
 
--- Insertion de l'historique des consultations
-INSERT INTO historique (id_utilisateur, id_telephone, date_consultation) VALUES
+INSERT INTO etat(libelle) VALUES
+    ('En cours de traitement'),
+    ('Expédiée'),
+    ('Livrée');
+
+INSERT INTO ligne_panier (utilisateur_id, telephone_id, date_ajout, quantite) VALUES
+    (2, 9, '2024-02-23 11:30:00', 1),
+    (2, 10, '2024-02-23 11:35:00', 2),
+    (2, 13, '2024-02-23 11:40:00', 1),
+    (2, 16, '2024-02-23 11:45:00', 1);
+
+INSERT INTO adresse (utilisateur_id, rue, ville, code_postal, pays, type_adresse) VALUES
+    (1, '10 Rue de la Paix', 'Paris', '75001', 'France', 'livraison'),
+    (2, '25 Avenue des Champs', 'Lyon', '69002', 'France', 'Facturation'),
+    (3, '5 Boulevard Haussmann', 'Marseille', '13008', 'France', 'livraison');
+
+INSERT INTO commande (date_achat, adresse_facturation_id, adresse_livraison_id, utilisateur_id, etat_id) VALUES
+    ('2025-02-01 14:30:00', 1, 1, 2, 1),
+    ('2025-02-05 09:15:00', 2, 2, 1, 2),
+    ('2025-02-10 18:45:00', 3, 3, 3, 3);
+
+INSERT INTO ligne_commande (commande_id, telephone_id, quantite, prix) VALUES
+    (1, 1, 2, 909.00),
+    (1, 4, 1, 809.00),
+    (2, 6, 3, 1199.00),
+    (3, 9, 1, 1099.00),
+    (3, 12, 2, 1449.00);
+
+INSERT INTO historique (utilisateur_id, telephone_id, date_consultation) VALUES
     (1, 1, '2025-01-01 12:00:00'),
     (2, 3, '2025-01-05 16:30:00'),
     (3, 5, '2025-01-10 09:00:00');
 
--- Insertion des notes
-INSERT INTO note (id_utilisateur, id_telephone, note) VALUES
+INSERT INTO note (utilisateur_id, telephone_id, note) VALUES
     (1, 1, 5),
     (2, 3, 4),
     (3, 5, 3);
 
--- Insertion des commentaires
-INSERT INTO commentaire (id_utilisateur, id_telephone, texte, date_publication) VALUES
+INSERT INTO commentaire (utilisateur_id, telephone_id, texte, date_publication) VALUES
     (1, 1, 'Super téléphone !', '2025-02-01 12:00:00'),
     (2, 3, 'Bon rapport qualité/prix.', '2025-02-05 14:30:00'),
     (3, 5, 'Un peu cher mais performant.', '2025-02-10 18:00:00');
+
+INSERT INTO paiement (commande_id, montant, date_paiement, methode, statut) VALUES
+    (1, 1718.00, '2025-02-01 15:00:00', 'Carte Bancaire', 'Validé'),
+    (2, 3597.00, '2025-02-05 10:00:00', 'PayPal', 'En attente'),
+    (3, 3997.00, '2025-02-10 19:00:00', 'Virement', 'Refusé');
