@@ -41,26 +41,3 @@ def activate_db_options(db):
         else:
             print('MYSQL : variable globale lower_case_table_names=0 ok')  # mettre en commentaire
     cursor.close()
-
-def get_filtered_products():
-    db = get_db()
-    cursor = db.cursor()
-    query = "SELECT * FROM telephone WHERE 1=1"
-    params = []
-    if session.get("filter_word"):
-        query += " AND (marque LIKE %s OR modele LIKE %s)"
-        params.extend([f"%{session['filter_word']}%", f"%{session['filter_word']}%"])
-    if session.get("filter_prix_min"):
-        query += " AND prix >= %s"
-        params.append(session["filter_prix_min"])
-    if session.get("filter_prix_max"):
-        query += " AND prix <= %s"
-        params.append(session["filter_prix_max"])
-    if session.get("filter_types"):
-        placeholders = ",".join(["%s"] * len(session["filter_types"]))
-        query += f" AND id_type_telephone IN ({placeholders})"
-        params.extend(session["filter_types"])
-    cursor.execute(query, params)
-    results = cursor.fetchall()
-    cursor.close()
-    return results
