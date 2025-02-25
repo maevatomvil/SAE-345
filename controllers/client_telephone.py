@@ -1,15 +1,19 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
-from flask import Blueprint, Flask, request, render_template, redirect, url_for, flash, session
+from flask import Blueprint
+from flask import Flask, request, render_template, redirect, abort, flash, session
+
 from connexion_db import get_db
 
-client_telephone = Blueprint('client_telephone', __name__, template_folder='templates')
+client_telephone = Blueprint('client_telephone', __name__,
+                        template_folder='templates')
 
 @client_telephone.route('/client/index')
-@client_telephone.route('/client/telephone/show')
-def client_telephone_show():
+@client_telephone.route('/client/telephone/show')              # remplace /client
+def client_telephone_show():                                 # remplace client_index
     mycursor = get_db().cursor()
     id_client = session['id_user']
+
 
     sql = '''   
        SELECT telephone.id_telephone AS id_telephone,
@@ -30,7 +34,6 @@ def client_telephone_show():
     '''
     mycursor.execute(sql)
     telephones = mycursor.fetchall()
-
     filter_word = session.get('filter_word', '')
     filter_prix_min = session.get('filter_prix_min')
     filter_prix_max = session.get('filter_prix_max')
@@ -58,6 +61,14 @@ def client_telephone_show():
 
     print(telephones)
 
+    # utilisation du filtre
+    sql = '''SELECT * FROM telephone;'''
+    mycursor.execute(sql)
+    telephone = mycursor.fetchall()
+    telephones = telephone
+
+
+    # pour le filtre
     sql = '''
     SELECT id_type_telephone, libelle_type_telephone as libelle
     FROM type_telephone 
@@ -66,37 +77,43 @@ def client_telephone_show():
     mycursor.execute(sql)
     types_telephone = mycursor.fetchall()
 
+    #pour le panier
+
     sql = '''
-    SELECT ligne_panier.telephone_id, ligne_panier.quantite, 
-           telephone.nom_telephone AS nom_telephone,  
-           telephone.prix_telephone AS prix_telephone,  
-           (ligne_panier.quantite * telephone.prix_telephone) AS prix_ligne
+    SELECT ligne_panier.telephone_id,
+    ligne_panier.quantite,
+    telephone.nom_telephone,
+    telephone.prix_telephone,
+    telephone.stock,
+    couleur.id_couleur,
+    couleur.libelle_couleur,
+    telephone.taille
     FROM ligne_panier
     JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
-    WHERE ligne_panier.utilisateur_id = %s
+    LEFT JOIN couleur ON telephone.couleur_id = couleur.id_couleur
+    WHERE ligne_panier.utilisateur_id = %s;
     '''
-    mycursor.execute(sql, (id_client,))
-    telephones_panier = mycursor.fetchall()
 
-    prix_total = None
-    if len(telephones_panier) >= 1:
-        sql = '''
-        SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
-        FROM ligne_panier
-        JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
-        WHERE ligne_panier.utilisateur_id = %s
-        '''
-        mycursor.execute(sql, (id_client,))
+    mycursor.execute(sql, (id_client,))
+    telephone_panier = mycursor.fetchall()
+
+    if len(telephone_panier) >= 1:
+        sql = ''' SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
+            FROM ligne_panier
+            JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
+            WHERE ligne_panier.utilisateur_id = %s; '''
+        mycursor.execute(sql, (id_client))
         result = mycursor.fetchone()
         prix_total = result['prix_total']
-
-    return render_template('client/boutique/panier_telephone.html',
-                           telephones=telephones,
-                           telephones_panier=telephones_panier,
-                           prix_total=prix_total,
-                           items_filtre=types_telephone,
-                           filter_word=filter_word,
-                           filter_prix_min=filter_prix_min,
-                           filter_prix_max=filter_prix_max,
-                           filter_types=filter_types
+    else:
+        prix_total = None
+    return render_template('client/boutique/panier_telephone.html'
+                           , telephones=telephones
+                           , telephone_panier=telephone_panier
+                           , prix_total=prix_total
+                           , items_filtre=types_telephone,
+                            filter_word = filter_word,
+                            filter_prix_min = filter_prix_min,
+                            filter_prix_max = filter_prix_max,
+                            filter_types = filter_types
                            )
