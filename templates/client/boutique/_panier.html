@@ -25,12 +25,12 @@
                     <td>
                         {# #}                            {% if item_panier.stock is defined %}
                         {# #}                               {% if item_panier.stock > 0 %}
-                            <form action="/client/panier/add"  style="display: inline-block;"  method="post">
-                                {# <input type="hidden" name="id_declinaison_telephone" value="{{ item_panier.id_declinaison_telephone }}"> #}
-                                <input type="hidden" name="quantite" value="1">
-                                <input type="hidden" name="id_telephone" value="{{ item_panier.id_telephone }}">
-                                <button class="btn btn-primary" > + </button>
-                            </form>
+                        <form action="/client/panier/add"  style="display: inline-block;"  method="post">
+                            {# <input type="hidden" name="id_declinaison_telephone" value="{{ item_panier.id_declinaison_telephone }}"> #}
+                            <input type="hidden" name="quantite" value="1">
+                            <input type="hidden" name="id_telephone" value="{{ item_panier.id_telephone }}">
+                            <button class="btn btn-primary" > + </button>
+                        </form>
                             {# #}                               {% endif %}
                         {# #}                           {% endif %}
                         <form action="/client/panier/delete"   style="display: inline-block;"  method="post">
