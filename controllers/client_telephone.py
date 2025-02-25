@@ -93,7 +93,7 @@ def client_telephone_show():
 
     return render_template('client/boutique/panier_telephone.html',
                            telephones=telephones,
-                           telephones_panier=telephones_panier,
+                           telephone_panier=telephones_panier,
                            prix_total=prix_total,
                            items_filtre=types_telephone,
                            filter_word=filter_word,
