@@ -56,7 +56,7 @@
                         <thead>
                         <tr>
                             <th>Date de commande</th>
-                            <th>Nombre d'telephones</th>
+                            <th>Nombre de télephones</th>
                             <th>Coût total</th>
                             <th>Etat de la commande</th>
                             <th style="text-align: center;">Options</th>
@@ -68,11 +68,11 @@
                                 <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
                                 <td> {{ commande.nbr_telephones }} </td>
                                 <td>
-                                    {{ "{:,.2f} €".format(commande.prix_total) }}
+                                    {{ commande.prix_total }} €
                                 </td>
                                 <td style="text-align: center;">
                                     {% if commande.etat_id == 1 %} <div style="background-color: #ba8b00; padding: 5px;">
-                                     {{ commande.libelle }}
+                                        {{ commande.libelle }}
                                     </div>
                                     {% else %} <div style="background-color: #34ce57; padding: 5px;">
                                         {{ commande.libelle }} </div>
