@@ -75,7 +75,7 @@ def client_telephone_show():
            (ligne_panier.quantite * telephone.prix_telephone) AS prix_ligne
     FROM ligne_panier
     JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
-    WHERE ligne_panier.utilisateur_id = %s
+    WHERE ligne_panier.utilisateur_id = %s;
     '''
     mycursor.execute(sql, (id_client,))
     telephones_panier = mycursor.fetchall()
@@ -86,7 +86,7 @@ def client_telephone_show():
         SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
         FROM ligne_panier
         JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
-        WHERE ligne_panier.utilisateur_id = %s
+        WHERE ligne_panier.utilisateur_id = %s;
         '''
         mycursor.execute(sql, (id_client,))
         result = mycursor.fetchone()

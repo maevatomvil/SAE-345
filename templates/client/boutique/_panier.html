@@ -9,39 +9,39 @@
                 <th style="width: 100px">Sous-Total</th>
                 <th style="width: 400px">Action</th>
             </tr>
-            {% for item_panier in telephone_panier %}
+            {% for items_panier in telephone_panier %}
                 <tr>
-                    <td>{{item_panier.nom_telephone}}
-                        {% if item_panier.couleur_id is defined and item_panier.couleur_id != None and item_panier.couleur_id >1 %}
-                            <small style="color: #6dcea2">({{ item_panier.libelle_couleur }})</small>
+                    <td>{{items_panier.nom_telephone}}
+                        {% if items_panier.couleur_id is defined and items_panier.couleur_id != None and items_panier.couleur_id >1 %}
+                            <small style="color: #6dcea2">({{ items_panier.libelle_couleur }})</small>
                         {% endif %}
-                        {% if item_panier.taille is defined and item_panier.taille != None and item_panier.taille >1 %}
-                            <small style="color: #d941c2">({{ item_panier.libelle_taille }})</small>
+                        {% if items_panier.taille is defined and items_panier.taille != None and items_panier.taille >1 %}
+                            <small style="color: #d941c2">({{ items_panier.libelle_taille }})</small>
                         {% endif %}
                     </td>
-                    <td>{{item_panier.quantite}}</td>
-                    <td>{{item_panier.prix_telephone}}</td>
-                    <td>{{ "{:,.2f} €".format((item_panier.prix_telephone * item_panier.quantite)) }}{#{(panier.telephone.prix * panier.quantite)|number_format(2) }#}</td>
+                    <td>{{items_panier.quantite}}</td>
+                    <td>{{items_panier.prix_telephone}}</td>
+                    <td>{{ "{:,.2f} €".format((items_panier.prix_telephone * items_panier.quantite)) }}{#{(panier.telephone.prix * panier.quantite)|number_format(2) }#}</td>
                     <td>
-                        {# #}                            {% if item_panier.stock is defined %}
-                        {# #}                               {% if item_panier.stock > 0 %}
+                        {# #}                            {% if items_panier.stock is defined %}
+                        {# #}                               {% if items_panier.stock > 0 %}
                         <form action="/client/panier/add"  style="display: inline-block;"  method="post">
                             {# <input type="hidden" name="id_declinaison_telephone" value="{{ item_panier.id_declinaison_telephone }}"> #}
                             <input type="hidden" name="quantite" value="1">
-                            <input type="hidden" name="id_telephone" value="{{ item_panier.id_telephone }}">
+                            <input type="hidden" name="id_telephone" value="{{ items_panier.id_telephone }}">
                             <button class="btn btn-primary" > + </button>
                         </form>
                             {# #}                               {% endif %}
                         {# #}                           {% endif %}
                         <form action="/client/panier/delete"   style="display: inline-block;"  method="post">
                             {# <input type="hidden" name="id_declinaison_telephone" value="{{ item_panier.id_declinaison_telephone }}"> #}
-                            <input type="hidden" name="id_telephone" value="{{ item_panier.id_telephone }}">
+                            <input type="hidden" name="id_telephone" value="{{ items_panier.id_telephone }}">
                             <button class="btn btn-primary" > - </button>
                         </form>
 
                         <form action="/client/panier/delete/line"  style="display: inline-block;"  method="post">
                             {# <input type="hidden" name="id_declinaison_telephone" value="{{ item_panier.id_declinaison_telephone }}"> #}
-                            <input type="hidden" name="id_telephone" value="{{ item_panier.id_telephone }}">
+                            <input type="hidden" name="id_telephone" value="{{ items_panier.id_telephone }}">
                             <button class="btn btn-primary" >Supprimer</button>
                         </form>
                     </td>

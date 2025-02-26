@@ -132,7 +132,7 @@ def client_panier_delete_line():
     id_client = session['id_user']
     #id_declinaison_telephone = request.form.get('id_declinaison_telephone')
 
-    sql = ''' selection de ligne du panier '''
+    sql = "SELECT * FROM ligne_panier WHERE utilisateur_id=%s"
 
     sql = ''' suppression de la ligne du panier '''
     sql2=''' mise à jour du stock de l'telephone : stock = stock + qté de la ligne pour l'telephone'''

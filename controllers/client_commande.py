@@ -49,7 +49,7 @@ def client_commande_valide():
     commande_adresses = dict(list(adresse_livraison.items()) + list(adresse_facturation.items()))
 
     return render_template('client/boutique/panier_validation_adresses.html'
-                           , #adresses=adresses
+                           #, adresses=adresses
                            , telephones_panier=telephones_panier
                            , prix_total= prix_total
                            , validation=1
