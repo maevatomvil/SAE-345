@@ -39,7 +39,7 @@ def client_commande_add():
     # choix de(s) (l')adresse(s)
 
     id_client = session['id_user']
-    sql = ''' selection du contenu du panier de l'utilisateur '''
+    sql = '''selection du contenu du panier de l'utilisateur'''
     items_ligne_panier = []
     # if items_ligne_panier is None or len(items_ligne_panier) < 1:
     #     flash(u'Pas d\'telephones dans le ligne_panier', 'alert-warning')
