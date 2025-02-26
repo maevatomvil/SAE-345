@@ -14,17 +14,42 @@ client_commande = Blueprint('client_commande', __name__,
 def client_commande_valide():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    sql = ''' selection des telephones d'un panier 
+    sql = '''
+    SELECT ligne_panier.telephone_id, ligne_panier.quantite, 
+           telephone.nom_telephone AS nom_telephone,  
+           telephone.prix_telephone AS prix_telephone,
+           telephone.stock AS stock,  
+           (ligne_panier.quantite * telephone.prix_telephone) AS prix_ligne
+    FROM ligne_panier
+    JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
+    WHERE ligne_panier.utilisateur_id = %s
     '''
-    telephones_panier = []
+    mycursor.execute(sql, (id_client,))
+    telephones_panier = mycursor.fetchall()
+    prix_total = None
     if len(telephones_panier) >= 1:
-        sql = ''' calcul du prix total du panier '''
-        prix_total = None
-    else:
-        prix_total = None
+        sql = '''
+        SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
+        FROM ligne_panier
+        JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
+        WHERE ligne_panier.utilisateur_id = %s
+        '''
+        mycursor.execute(sql, (id_client,))
+        result = mycursor.fetchone()
+        prix_total = result['prix_total']
     # etape 2 : selection des adresses
+
+        sql = '''SELECT commande.adresse_livraison_id, adresse.rue, adresse.code_postal, adresse.ville
+                 FROM commande
+                 JOIN adresse on commande.adresse_livraison_id = adresse.id_adresse
+                 WHERE commande.id_commande = %s'''
+        mycursor.execute(sql, id_commande)
+        adresse_livraison = mycursor.fetchall()
+
+        commande_adresses = dict(list(adresse_livraison.items()) + list(adresse_facturation.items()))
+
     return render_template('client/boutique/panier_validation_adresses.html'
-                           #, adresses=adresses
+                           , adresses=adresses
                            , telephones_panier=telephones_panier
                            , prix_total= prix_total
                            , validation=1
@@ -78,12 +103,12 @@ def client_commande_show():
     mycursor.execute("SELECT * FROM ligne_commande")
     print(mycursor.fetchall())
 
-    sql = """SELECT commande.date_achat, COUNT(ligne_commande.telephone_id) AS nbr_telephones, SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total, commande.etat_id, etat.libelle 
+    sql = """SELECT commande.id_commande, commande.date_achat, COUNT(ligne_commande.telephone_id) AS nbr_telephones, SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total, commande.etat_id, etat.libelle 
              FROM commande
              JOIN ligne_commande ON commande.id_commande = ligne_commande.commande_id
              JOIN etat ON commande.etat_id = etat.id_etat
              WHERE utilisateur_id = %s
-             GROUP BY commande.date_achat, commande.etat_id, etat.libelle
+             GROUP BY commande.id_commande, commande.date_achat, commande.etat_id, etat.libelle
              ORDER BY commande.date_achat;"""
     mycursor.execute(sql, id_client)
     commandes = mycursor.fetchall()
@@ -95,9 +120,30 @@ def client_commande_show():
     if id_commande != None:
         print(id_commande)
         sql = ''' selection du détails d'une commande '''
+        sql = '''SELECT ligne_commande.*, telephone.nom_telephone AS nom, SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_ligne
+                 FROM ligne_commande
+                 JOIN telephone ON ligne_commande.telephone_id = telephone.id_telephone
+                 WHERE ligne_commande.commande_id = %s
+                 GROUP BY ligne_commande.commande_id, ligne_commande.telephone_id, ligne_commande.prix, ligne_commande.quantite'''
+        mycursor.execute(sql, id_commande)
+        telephones_commande = mycursor.fetchall()
 
         # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
-        sql = ''' selection des adressses '''
+        sql = '''SELECT commande.adresse_livraison_id, adresse.rue AS rue_livraison, adresse.code_postal AS code_postal_livraison, adresse.ville as ville_livraison
+                 FROM commande
+                 JOIN adresse on commande.adresse_livraison_id = adresse.id_adresse
+                 WHERE commande.id_commande = %s'''
+        mycursor.execute(sql, id_commande)
+        adresse_livraison = mycursor.fetchone()
+
+        sql = '''SELECT commande.adresse_facturation_id, adresse.rue AS rue_facturation, adresse.code_postal AS code_postal_facturation, adresse.ville as ville_facturation
+                 FROM commande
+                 JOIN adresse on commande.adresse_facturation_id = adresse.id_adresse
+                 WHERE commande.id_commande = %s'''
+        mycursor.execute(sql, id_commande)
+        adresse_facturation = mycursor.fetchone()
+
+        commande_adresses = dict(list(adresse_livraison.items()) + list(adresse_facturation.items()))
 
     return render_template('client/commandes/show.html'
                            , commandes=commandes

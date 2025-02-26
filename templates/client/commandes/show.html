@@ -2,7 +2,7 @@
 {% block body %}
     <div class="container-fluid">
             {% if telephones_commande %}
-            <h3>Recapitulatifs de la commande selectionnée</h3>
+            <h3>Récapitulatifs de la commande selectionnée</h3>
             <table class="table">
                 <thead class="thead-dark">
                     <tr><th>Nom</th><th>Quantite</th><th>Prix</th><th>Prix total</th></tr>
@@ -35,13 +35,13 @@
             </table>
                 <br>
                 <div style="color: brown">
-                <strong>adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
+                <strong>adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }}, {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
                 <br>
                 <strong>adresse facturation : </strong>
                 {% if commande_adresses.adresse_identique == 'adresse_identique' %}
                     adresse identique
                 {% else %}
-                    {{ commande_adresses.nom_facturation }} {{ commande_adresses.rue_facturation }} {{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}
+                    {{ commande_adresses.nom_facturation }} {{ commande_adresses.rue_facturation }}, {{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}
                 {% endif %}
                 </div>
             <hr>
