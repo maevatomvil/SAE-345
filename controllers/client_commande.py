@@ -38,15 +38,15 @@ def client_commande_valide():
         result = mycursor.fetchone()
         prix_total = result['prix_total']
     # etape 2 : selection des adresses
-"""
-        sql = '''SELECT commande.adresse_livraison_id, adresse.rue, adresse.code_postal, adresse.ville
-                 FROM commande
-                 JOIN adresse on commande.adresse_livraison_id = adresse.id_adresse
-                 WHERE commande.id_commande = %s'''
-        mycursor.execute(sql, id_commande)
-        adresse_livraison = mycursor.fetchall()
 
-        commande_adresses = dict(list(adresse_livraison.items()) + list(adresse_facturation.items()))"""
+    #sql = '''SELECT commande.adresse_livraison_id, adresse.rue, adresse.code_postal, adresse.ville
+    #            FROM commande
+    #            JOIN adresse on commande.adresse_livraison_id = adresse.id_adresse
+    #            WHERE commande.id_commande = %s'''
+    #mycursor.execute(sql, id_commande)
+    #adresse_livraison = mycursor.fetchall()
+
+    commande_adresses = dict(list(adresse_livraison.items()) + list(adresse_facturation.items()))
 
     return render_template('client/boutique/panier_validation_adresses.html'
                            , #adresses=adresses
