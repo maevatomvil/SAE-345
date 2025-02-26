@@ -70,7 +70,8 @@ def client_telephone_show():
     sql = '''
     SELECT ligne_panier.telephone_id, ligne_panier.quantite, 
            telephone.nom_telephone AS nom_telephone,  
-           telephone.prix_telephone AS prix_telephone,  
+           telephone.prix_telephone AS prix_telephone,
+           telephone.stock AS stock,  
            (ligne_panier.quantite * telephone.prix_telephone) AS prix_ligne
     FROM ligne_panier
     JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
