@@ -120,11 +120,10 @@ def client_commande_show():
     if id_commande != None:
         print(id_commande)
         sql = ''' selection du détails d'une commande '''
-        sql = '''SELECT ligne_commande.*, telephone.nom_telephone AS nom, SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_ligne
+        sql = '''SELECT ligne_commande.*, telephone.nom_telephone AS nom, (ligne_commande.prix * ligne_commande.quantite) AS prix_ligne
                  FROM ligne_commande
                  JOIN telephone ON ligne_commande.telephone_id = telephone.id_telephone
-                 WHERE ligne_commande.commande_id = %s
-                 GROUP BY ligne_commande.commande_id, ligne_commande.telephone_id, ligne_commande.prix, ligne_commande.quantite'''
+                 WHERE ligne_commande.commande_id = %s'''
         mycursor.execute(sql, id_commande)
         telephones_commande = mycursor.fetchall()
 
