@@ -130,14 +130,24 @@ def client_panier_vider():
 def client_panier_delete_line():
     mycursor = get_db().cursor()
     id_client = session['id_user']
+    telephone_id = request.form.get('id_telephone','')
     #id_declinaison_telephone = request.form.get('id_declinaison_telephone')
 
     sql = "SELECT * FROM ligne_panier WHERE utilisateur_id=%s"
+    mycursor.execute(sql, (id_client,))
+    items_panier = mycursor.fetchall()
 
-    sql = ''' suppression de la ligne du panier '''
-    sql2=''' mise à jour du stock de l'telephone : stock = stock + qté de la ligne pour l'telephone'''
+    if items_panier:
+        quantite = items_panier[0]['quantite']
 
-    get_db().commit()
+        sql = "DELETE FROM ligne_panier WHERE utilisateur_id=%s AND telephone_id=%s"
+        mycursor.execute(sql, (id_client, telephone_id))
+
+        sql = "UPDATE telephone SET stock = stock + %s WHERE id_telephone = %s"
+        mycursor.execute(sql, (quantite, telephone_id))
+
+        get_db().commit()
+
     return redirect('/client/telephone/show')
 
 
