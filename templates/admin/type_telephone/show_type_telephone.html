@@ -23,8 +23,8 @@
                   <td>{{ ligne.id_type_telephone }}</td>
                    <td><span style="color: red">{{ ligne.nbr_telephones }}</span></td>
                   <td>
-                      <a class="btn btn-outline-danger" href="/admin/type-telephone/edit?id_type_telephone={{ ligne.id_type_telephone }}">editer</a>&nbsp;
-                      <a class="btn btn-outline-warning" href="/admin/type-telephone/delete?id_type_telephone={{ ligne.id_type_telephone }}">supprimer</a>
+                      <a class="btn btn-outline-warning" href="/admin/type-telephone/edit?id_type_telephone={{ ligne.id_type_telephone }}">editer</a>
+                      <a class="btn btn-outline-danger" href="/admin/type-telephone/delete?id_type_telephone={{ ligne.id_type_telephone }}">supprimer</a>
                   </td>
            </tr>
         {% endfor %}

@@ -17,11 +17,32 @@ admin_telephone = Blueprint('admin_telephone', __name__,
 @admin_telephone.route('/admin/telephone/show')
 def show_telephone():
     mycursor = get_db().cursor()
-    sql = '''  requête admin_telephone_1
+
+    # Récupérer les paramètres de filtrage
+    filter_stock = request.args.get('filter_stock')
+
+    sql = '''
+    SELECT telephone.id_telephone, telephone.nom_telephone as nom, 
+           telephone.type_telephone_id, telephone.prix_telephone as prix,
+           telephone.stock, telephone.image, type_telephone.libelle_type_telephone as libelle
+    FROM telephone
+    LEFT JOIN type_telephone ON telephone.type_telephone_id = type_telephone.id_type_telephone
     '''
-    mycursor.execute(sql)
+
+    params = []
+    if filter_stock == 'low':
+        sql += ' WHERE telephone.stock <= 5 AND telephone.stock > 0'
+    elif filter_stock == 'out':
+        sql += ' WHERE telephone.stock = 0'
+
+    sql += ' ORDER BY telephone.nom_telephone'
+
+    mycursor.execute(sql, params)
     telephones = mycursor.fetchall()
-    return render_template('admin/telephone/show_telephone.html', telephones=telephones)
+
+    return render_template('admin/telephone/show_telephone.html',
+                           telephones=telephones,
+                           filter_stock=filter_stock)
 
 
 @admin_telephone.route('/admin/telephone/add', methods=['GET'])
