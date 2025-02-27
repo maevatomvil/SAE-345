@@ -90,30 +90,57 @@ def valid_add_telephone():
 
 @admin_telephone.route('/admin/telephone/delete', methods=['GET'])
 def delete_telephone():
-    id_telephone=request.args.get('id_telephone')
+    id_telephone = request.args.get('id_telephone')
     mycursor = get_db().cursor()
-    sql = ''' requête admin_telephone_3 '''
-    mycursor.execute(sql, id_telephone)
-    nb_declinaison = mycursor.fetchone()
-    if nb_declinaison['nb_declinaison'] > 0:
-        message= u'il y a des declinaisons dans cet telephone : vous ne pouvez pas le supprimer'
+
+    sql = '''SELECT COUNT(*) AS nb_commandes FROM ligne_commande WHERE telephone_id = %s'''
+    mycursor.execute(sql, (id_telephone,))
+    result = mycursor.fetchone()
+    nb_commandes = result['nb_commandes'] if result else 0
+
+    sql = '''SELECT COUNT(*) AS nb_commentaires FROM commentaire WHERE telephone_id = %s'''
+    mycursor.execute(sql, (id_telephone,))
+    result = mycursor.fetchone()
+    nb_commentaires = result['nb_commentaires'] if result else 0
+
+    if nb_commandes > 0:
+        message = u'Impossible de supprimer ce téléphone : il est présent dans ' + str(nb_commandes) + ' commande(s)'
+        flash(message, 'alert-warning')
+    elif nb_commentaires > 0:
+        message = u'Impossible de supprimer ce téléphone : il a ' + str(nb_commentaires) + ' commentaire(s) associé(s)'
         flash(message, 'alert-warning')
     else:
-        sql = ''' requête admin_telephone_4 '''
-        mycursor.execute(sql, id_telephone)
-        telephone = mycursor.fetchone()
-        print(telephone)
-        image = telephone['image']
+        sql = '''SELECT COUNT(*) AS nb_panier FROM ligne_panier WHERE telephone_id = %s'''
+        mycursor.execute(sql, (id_telephone,))
+        result = mycursor.fetchone()
+        nb_panier = result['nb_panier'] if result else 0
 
-        sql = ''' requête admin_telephone_5  '''
-        mycursor.execute(sql, id_telephone)
-        get_db().commit()
-        if image != None:
-            os.remove('static/images/' + image)
+        if nb_panier > 0:
+            message = u'Impossible de supprimer ce téléphone : il est présent dans ' + str(nb_panier) + ' panier(s)'
+            flash(message, 'alert-warning')
+        else:
+            sql = '''SELECT * FROM telephone WHERE id_telephone = %s'''
+            mycursor.execute(sql, (id_telephone,))
+            telephone = mycursor.fetchone()
 
-        print("un telephone supprimé, id :", id_telephone)
-        message = u'un telephone supprimé, id : ' + id_telephone
-        flash(message, 'alert-success')
+            if telephone:
+                image = telephone['image']
+
+                sql = '''DELETE FROM telephone WHERE id_telephone = %s'''
+                mycursor.execute(sql, (id_telephone,))
+                get_db().commit()
+
+                if image is not None:
+                    image_path = os.path.join('static/images/', image)
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
+
+                print("un telephone supprimé, id :", id_telephone)
+                message = u'un telephone supprimé, id : ' + id_telephone
+                flash(message, 'alert-success')
+            else:
+                message = u'Téléphone non trouvé avec l\'id : ' + id_telephone
+                flash(message, 'alert-warning')
 
     return redirect('/admin/telephone/show')
 
