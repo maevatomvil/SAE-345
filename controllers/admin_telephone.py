@@ -130,10 +130,10 @@ def delete_telephone():
                 mycursor.execute(sql, (id_telephone,))
                 get_db().commit()
 
-                if image is not None:
-                    image_path = os.path.join('static/images/', image)
-                    if os.path.exists(image_path):
-                        os.remove(image_path)
+                #if image is not None:
+                    #image_path = os.path.join('static/images/', image)
+                    #if os.path.exists(image_path):
+                        #os.remove(image_path)
 
                 print("un telephone supprimé, id :", id_telephone)
                 message = u'un telephone supprimé, id : ' + id_telephone
