@@ -14,7 +14,7 @@ def admin_index():
     return render_template('admin/layout_admin.html')
 
 
-@admin_commande.route('/admin/commande/show', methods=['get','post'])
+@admin_commande.route('/admin/commande/show', methods=['get', 'post'])
 def admin_commande_show():
     mycursor = get_db().cursor()
     admin_id = session['id_user']
@@ -45,8 +45,53 @@ def admin_commande_show():
                  WHERE ligne_commande.commande_id = %s'''
         mycursor.execute(sql, id_commande)
         articles_commande = mycursor.fetchall()
+
+        sql_adresse_livraison = '''SELECT commande.adresse_livraison_id, adresse.rue AS rue_livraison, 
+                          adresse.code_postal AS code_postal_livraison, adresse.ville AS ville_livraison,
+                          adresse.nom AS nom_livraison
+                   FROM commande
+                   JOIN adresse ON commande.adresse_livraison_id = adresse.id_adresse
+                   WHERE commande.id_commande = %s'''
+
+        sql_adresse_facturation = '''SELECT commande.adresse_facturation_id, adresse.rue AS rue_facturation, 
+                            adresse.code_postal AS code_postal_facturation, adresse.ville AS ville_facturation,
+                            adresse.nom AS nom_facturation  
+                     FROM commande
+                     JOIN adresse ON commande.adresse_facturation_id = adresse.id_adresse
+                     WHERE commande.id_commande = %s'''
+
+        try:
+            mycursor.execute(sql_adresse_livraison, id_commande)
+            adresse_livraison = mycursor.fetchone() or {}
+
+            mycursor.execute(sql_adresse_facturation, id_commande)
+            adresse_facturation = mycursor.fetchone() or {}
+
+            commande_adresses = {}
+            if adresse_livraison:
+                commande_adresses.update(adresse_livraison)
+            if adresse_facturation:
+                commande_adresses.update(adresse_facturation)
+
+        except Exception as e:
+            print(f"Erreur lors de la récupération des adresses: {e}")
+            commande_adresses = {}
+
     return render_template('admin/commandes/show.html'
                            , commandes=commandes
                            , articles_commande=articles_commande
                            , commande_adresses=commande_adresses
                            )
+
+@admin_commande.route('/admin/commande/valider', methods=['get','post'])
+def admin_commande_valider():
+    mycursor = get_db().cursor()
+    commande_id = request.form.get('id_commande', None)
+    if commande_id != None:
+        print(commande_id)
+        # Mise à jour de l'état de la commande vers "expédié" (id_etat=2)
+        sql = '''UPDATE commande SET etat_id = 2 WHERE id_commande = %s'''
+        mycursor.execute(sql, commande_id)
+        get_db().commit()
+        flash(u'Commande validée et expédiée', 'alert-success')
+    return redirect('/admin/commande/show')
