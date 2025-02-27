@@ -39,17 +39,14 @@ def client_commande_valide():
         prix_total = result['prix_total']
     # etape 2 : selection des adresses
 
-    #sql = '''SELECT commande.adresse_livraison_id, adresse.rue, adresse.code_postal, adresse.ville
-    #            FROM commande
-    #            JOIN adresse on commande.adresse_livraison_id = adresse.id_adresse
-    #            WHERE commande.id_commande = %s'''
-    #mycursor.execute(sql, id_commande)
-    #adresse_livraison = mycursor.fetchall()
+    sql = '''SELECT id_adresse, rue, ville, code_postal FROM adresse WHERE utilisateur_id = %s'''
+    mycursor.execute(sql, id_client)
+    adresses = mycursor.fetchall()
 
-    commande_adresses = dict(list(adresse_livraison.items()) + list(adresse_facturation.items()))
+    #commande_adresses = dict(list(adresse_livraison.items()) + list(adresse_facturation.items()))
 
     return render_template('client/boutique/panier_validation_adresses.html'
-                           #, adresses=adresses
+                           , adresses=adresses
                            , telephones_panier=telephones_panier
                            , prix_total= prix_total
                            , validation=1
@@ -62,6 +59,8 @@ def client_commande_add():
     mycursor = get_db().cursor()
 
     id_client = session['id_user']
+    id_adresse_livraison = request.form.get("id_adresse_livraison", "")
+    id_adresse_facturation = request.form.get("id_adresse_facturation", "")
 
     sql = "SELECT * FROM ligne_panier WHERE utilisateur_id = %s"
     mycursor.execute(sql, id_client)
@@ -71,8 +70,8 @@ def client_commande_add():
         return redirect('/client/telephone/show')
     
     date_commande = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    tuple_insert = (date_commande, id_client, '1')
-    sql = "INSERT INTO commande(date_achat, utilisateur_id, etat_id) VALUES (%s, %s, %s)"
+    tuple_insert = (date_commande, id_client, '1', id_adresse_facturation, id_adresse_livraison)
+    sql = "INSERT INTO commande(date_achat, utilisateur_id, etat_id, adresse_facturation_id, adresse_livraison_id) VALUES (%s, %s, %s, %s, %s)"
     mycursor.execute(sql, tuple_insert)
     sql = '''SELECT last_insert_id() as last_insert_id'''
     mycursor.execute(sql)

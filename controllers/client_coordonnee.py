@@ -13,10 +13,22 @@ client_coordonnee = Blueprint('client_coordonnee', __name__,
 def client_coordonnee_show():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    utilisateur=[]
+    sql = "SELECT login, nom, email FROM utilisateur WHERE id_utilisateur = %s"
+    mycursor.execute(sql, id_client)
+    utilisateur=mycursor.fetchone()
+
+    sql = '''SELECT adresse.rue, adresse.ville, adresse.code_postal, COUNT(commande.adresse_livraison_id) as nbr_commandes
+             FROM adresse 
+             JOIN commande ON adresse.id_adresse = commande.adresse_livraison_id
+             WHERE adresse.utilisateur_id = %s
+             GROUP BY adresse.rue, adresse.ville, adresse.code_postal'''
+    mycursor.execute(sql, id_client)
+    adresses=mycursor.fetchall()
+
+
     return render_template('client/coordonnee/show_coordonnee.html'
                            , utilisateur=utilisateur
-                         #  , adresses=adresses
+                           , adresses=adresses
                          #  , nb_adresses=nb_adresses
                            )
 
