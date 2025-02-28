@@ -66,29 +66,34 @@ def valid_add_telephone():
     nom = request.form.get('nom', '')
     type_telephone_id = request.form.get('type_telephone_id', '')
     prix = request.form.get('prix', '')
-    description = request.form.get('description', '')
+    fournisseur = request.form.get('fournisseur', '')  # Récupérer la valeur de 'fournisseur'
+    marque = request.form.get('marque', '')  # Récupérer la valeur de 'marque'
     image = request.files.get('image', '')
 
     if image:
-        filename = 'img_upload'+ str(int(2147483647 * random())) + '.png'
+        filename = 'img_upload' + str(int(2147483647 * random())) + '.png'
         image.save(os.path.join('static/images/', filename))
     else:
         print("erreur")
-        filename=None
+        filename = None
 
-    sql = '''  requête admin_telephone_2 '''
+    # Mise à jour de la requête SQL pour inclure 'fournisseur' et 'marque'
+    sql = '''INSERT INTO telephone(nom_telephone, image, prix_telephone, type_telephone_id, fournisseur, marque) 
+             VALUES (%s, %s, %s, %s, %s, %s)'''
 
-    tuple_add = (nom, filename, prix, type_telephone_id, description)
+    tuple_add = (nom, filename, prix, type_telephone_id, fournisseur, marque)
+
     print(tuple_add)
     mycursor.execute(sql, tuple_add)
     get_db().commit()
 
-    print(u'telephone ajouté , nom: ', nom, ' - type_telephone:', type_telephone_id, ' - prix:', prix,
-          ' - description:', description, ' - image:', image)
-    message = u'telephone ajouté , nom:' + nom + '- type_telephone:' + type_telephone_id + ' - prix:' + prix + ' - description:' + description + ' - image:' + str(
-        image)
+    print(u'téléphone ajouté , nom: ', nom, ' - type_telephone:', type_telephone_id, ' - prix:', prix,
+          ' - fournisseur:', fournisseur, ' - marque:', marque, ' - image:', image)
+    message = u'téléphone ajouté , nom:' + nom + '- type_telephone:' + type_telephone_id + ' - prix:' + prix + ' - fournisseur:' + fournisseur + ' - marque:' + marque + ' - image:' + str(image)
     flash(message, 'alert-success')
+
     return redirect('/admin/telephone/show')
+
 
 
 @admin_telephone.route('/admin/telephone/delete', methods=['GET'])
