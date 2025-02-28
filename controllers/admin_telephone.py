@@ -150,31 +150,31 @@ def delete_telephone():
 
 @admin_telephone.route('/admin/telephone/edit', methods=['GET'])
 def edit_telephone():
-    id_telephone=request.args.get('id_telephone')
+    id_telephone = request.args.get('id_telephone')
     mycursor = get_db().cursor()
     sql = '''
-    requête admin_telephone_6    
+    SELECT telephone.id_telephone, telephone.nom_telephone as nom, 
+           telephone.prix_telephone as prix, telephone.type_telephone_id, 
+           telephone.image, telephone.stock,
+           type_telephone.libelle_type_telephone as libelle
+    FROM telephone
+    LEFT JOIN type_telephone ON telephone.type_telephone_id = type_telephone.id_type_telephone
+    WHERE telephone.id_telephone = %s
     '''
-    mycursor.execute(sql, id_telephone)
+    mycursor.execute(sql, (id_telephone,))
     telephone = mycursor.fetchone()
-    print(telephone)
+
     sql = '''
-    requête admin_telephone_7
+    SELECT id_type_telephone, libelle_type_telephone as libelle
+    FROM type_telephone
+    ORDER BY libelle_type_telephone
     '''
     mycursor.execute(sql)
     types_telephone = mycursor.fetchall()
 
-    # sql = '''
-    # requête admin_telephone_6
-    # '''
-    # mycursor.execute(sql, id_telephone)
-    # declinaisons_telephone = mycursor.fetchall()
-
-    return render_template('admin/telephone/edit_telephone.html'
-                           ,telephone=telephone
-                           ,types_telephone=types_telephone
-                         #  ,declinaisons_telephone=declinaisons_telephone
-                           )
+    return render_template('admin/telephone/edit_telephone.html',
+                           telephone=telephone,
+                           types_telephone=types_telephone)
 
 
 @admin_telephone.route('/admin/telephone/edit', methods=['POST'])
@@ -185,30 +185,41 @@ def valid_edit_telephone():
     image = request.files.get('image', '')
     type_telephone_id = request.form.get('type_telephone_id', '')
     prix = request.form.get('prix', '')
-    description = request.form.get('description')
+
     sql = '''
-       requête admin_telephone_8
-       '''
-    mycursor.execute(sql, id_telephone)
+    SELECT image FROM telephone WHERE id_telephone = %s
+    '''
+    mycursor.execute(sql, (id_telephone,))
     image_nom = mycursor.fetchone()
     image_nom = image_nom['image']
+
     if image:
         if image_nom != "" and image_nom is not None and os.path.exists(
                 os.path.join(os.getcwd() + "/static/images/", image_nom)):
             os.remove(os.path.join(os.getcwd() + "/static/images/", image_nom))
-        # filename = secure_filename(image.filename)
-        if image:
-            filename = 'img_upload_' + str(int(2147483647 * random())) + '.png'
-            image.save(os.path.join('static/images/', filename))
-            image_nom = filename
 
-    sql = '''  requête admin_telephone_9 '''
-    mycursor.execute(sql, (nom, image_nom, prix, type_telephone_id, description, id_telephone))
+        # Génération d'un nom de fichier unique: préfixe + nombre aléatoire (max 2^31-1) + extension .png
+        # Pour éviter les collisions entre fichiers et standardiser le format des images
+        filename = 'img_upload_' + str(int(2147483647 * random())) + '.png'
+        image.save(os.path.join('static/images/', filename))
+        image_nom = filename
+
+    sql = '''
+    UPDATE telephone 
+    SET nom_telephone = %s, 
+        image = %s, 
+        prix_telephone = %s, 
+        type_telephone_id = %s 
+    WHERE id_telephone = %s
+    '''
+    mycursor.execute(sql, (nom, image_nom, prix, type_telephone_id, id_telephone))
 
     get_db().commit()
+
     if image_nom is None:
         image_nom = ''
-    message = u'telephone modifié , nom:' + nom + '- type_telephone :' + type_telephone_id + ' - prix:' + prix  + ' - image:' + image_nom + ' - description: ' + description
+
+    message = u'telephone modifié , nom:' + nom + '- type_telephone :' + type_telephone_id + ' - prix:' + prix + ' - image:' + image_nom
     flash(message, 'alert-success')
     return redirect('/admin/telephone/show')
 
