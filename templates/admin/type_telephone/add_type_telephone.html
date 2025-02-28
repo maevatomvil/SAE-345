@@ -1,7 +1,7 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>ajouter un type d'telephone</title>
+    <title>Ajouter un type de téléphone</title>
 {% endblock %}
 
 {% block body %}
@@ -10,7 +10,7 @@
   {% endif %}
   <form method="post" action="/admin/type-telephone/add">
     <fieldset>
-        <legend>Créer un type d'telephone</legend>
+        <legend>Créer un type de téléphone</legend>
         <div class="mb-3">
             <label class="form-label" for="libelle">Libellé</label><br>
             <input class="form-control" id="libelle" type="text" name="libelle" size="18" value="" placeholder="Saisir le libelle du type de l'telephone" required><br>

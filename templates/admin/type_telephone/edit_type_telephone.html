@@ -1,7 +1,7 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>modifier un type d'telephone</title>
+    <title>Modifier un type de téléphone</title>
 {% endblock %}
 
 {% block body %}
@@ -10,10 +10,10 @@
   {% endif %}
   <form method="post" action="/admin/type-telephone/edit">
     <fieldset>
-        <legend> Modifier un type d'telephone</legend>
+        <legend> Modifier un type de téléphone</legend>
         <div class="mb-3">
         <input type="hidden" name="id_type_telephone" size="18" value="{{ type_telephone.id_type_telephone }}" id="id">
-        <label for="libelle">libellé</label><br>
+        <label for="libelle">Libellé</label><br>
 
         <input class="form-select" type="text" name="libelle" size="18" value="{{ type_telephone.libelle_type_telephone }}" id="libelle"><br>
         </div>

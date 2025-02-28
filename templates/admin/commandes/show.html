@@ -35,9 +35,9 @@
             </table>
                <br>
                 <div style="color: brown">
-                <strong>adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
+                <strong>Adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
                 <br>
-                <strong>adresse facturation : </strong>
+                <strong>Adresse facturation : </strong>
                 {% if commande_adresses.adresse_identique == 'adresse_identique' %}
                     adresse identique
                 {% else %}

@@ -1,12 +1,12 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>afficher les types d'telephone</title>
-{% endblock %}
+    <title>Afficher les types de téléphone</title>
+{% endblock %}s
 
 {% block body %}
 <h3>Déclinaison et/ou type d'telephone (catégorie)</h3>
-<a class="btn btn-outline-success" href="/admin/type-telephone/add">ajouter un type d'telephone</a>
+<a class="btn btn-outline-success" href="/admin/type-telephone/add">Ajouter un type de téléphone</a>
 <br><br>
 
 <table class="table">
@@ -23,8 +23,8 @@
                   <td>{{ ligne.id_type_telephone }}</td>
                    <td><span style="color: red">{{ ligne.nbr_telephones }}</span></td>
                   <td>
-                      <a class="btn btn-outline-warning" href="/admin/type-telephone/edit?id_type_telephone={{ ligne.id_type_telephone }}">editer</a>
-                      <a class="btn btn-outline-danger" href="/admin/type-telephone/delete?id_type_telephone={{ ligne.id_type_telephone }}">supprimer</a>
+                      <a class="btn btn-outline-warning" href="/admin/type-telephone/edit?id_type_telephone={{ ligne.id_type_telephone }}">Editer</a>
+                      <a class="btn btn-outline-danger" href="/admin/type-telephone/delete?id_type_telephone={{ ligne.id_type_telephone }}">Supprimer</a>
                   </td>
            </tr>
         {% endfor %}
