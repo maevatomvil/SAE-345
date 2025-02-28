@@ -49,11 +49,14 @@ def show_telephone():
 def add_telephone():
     mycursor = get_db().cursor()
 
-    return render_template('admin/telephone/add_telephone.html'
-                           #,types_telephone=type_telephone,
-                           #,couleurs=colors
-                           #,tailles=tailles
-                            )
+    sql = '''SELECT id_type_telephone, libelle_type_telephone as libelle 
+             FROM type_telephone 
+             ORDER BY libelle_type_telephone'''
+    mycursor.execute(sql)
+    types_telephone = mycursor.fetchall()
+
+    return render_template('admin/telephone/add_telephone.html',
+                           types_telephone=types_telephone)
 
 
 @admin_telephone.route('/admin/telephone/add', methods=['POST'])
