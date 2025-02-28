@@ -6,12 +6,47 @@ from connexion_db import get_db
 client_telephone = Blueprint('client_telephone', __name__, template_folder='templates')
 
 @client_telephone.route('/client/index')
-@client_telephone.route('/client/telephone/show')
+@client_telephone.route('/client/telephone/show', methods=['GET', 'POST'])
 def client_telephone_show():
     mycursor = get_db().cursor()
-    id_client = session['id_user']
+    id_client = session.get('id_user')
 
-    sql = '''   
+    if request.method == 'POST':
+        filter_word = request.form.get('filter_word', '').strip()
+        filter_prix_min = request.form.get('filter_prix_min', '')
+        filter_prix_max = request.form.get('filter_prix_max', '')
+        filter_types_raw = request.form.getlist('filter_types[]')
+
+        filter_types = []
+        for item in filter_types_raw:
+            if isinstance(item, str) and item.isdigit():
+                filter_types.append(int(item))
+
+        # Conversion prix min avec gestion d'erreur individuelle
+        try:
+            filter_prix_min = float(filter_prix_min) if filter_prix_min else None
+        except ValueError:
+            filter_prix_min = None
+            flash("Le prix minimum n'est pas valide.", "alert-warning")
+        
+        # Conversion prix max avec gestion d'erreur individuelle  
+        try:
+            filter_prix_max = float(filter_prix_max) if filter_prix_max else None
+        except ValueError:
+            filter_prix_max = None
+            flash("Le prix maximum n'est pas valide.", "alert-warning")
+
+        session['filter_word'] = filter_word
+        session['filter_prix_min'] = filter_prix_min
+        session['filter_prix_max'] = filter_prix_max
+        session['filter_types'] = filter_types
+    else:
+        filter_word = session.get('filter_word', '')
+        filter_prix_min = session.get('filter_prix_min')
+        filter_prix_max = session.get('filter_prix_max')
+        filter_types = session.get('filter_types', [])
+
+    sql = '''
        SELECT telephone.id_telephone AS id_telephone,
               telephone.nom_telephone AS nom_telephone, 
               telephone.prix_telephone AS prix_telephone,  
@@ -26,69 +61,61 @@ def client_telephone_show():
        FROM telephone
        JOIN couleur ON telephone.couleur_id = couleur.id_couleur
        JOIN type_telephone ON telephone.type_telephone_id = type_telephone.id_type_telephone
-       ORDER BY telephone.nom_telephone;
+       WHERE 1=1
     '''
-    mycursor.execute(sql)
+    params = []
+
+    if filter_word:
+        sql += " AND (telephone.nom_telephone LIKE %s OR type_telephone.libelle_type_telephone LIKE %s)"
+        params.extend((f"%{filter_word}%", f"%{filter_word}%"))
+
+    if filter_prix_min is not None:
+        sql += " AND telephone.prix_telephone >= %s"
+        params.append(filter_prix_min)
+
+    if filter_prix_max is not None:
+        sql += " AND telephone.prix_telephone <= %s"
+        params.append(filter_prix_max)
+
+    if filter_types:
+        sql += " AND telephone.type_telephone_id IN ({})".format(",".join(["%s"] * len(filter_types)))
+        params.extend(filter_types)
+
+    sql += " ORDER BY telephone.nom_telephone"
+
+    mycursor.execute(sql, params)
     telephones = mycursor.fetchall()
 
+    if not telephones:
+        flash("Aucun téléphone ne correspond à votre sélection.", "alert-warning")
 
-    filter_word = session.get('filter_word', '')
-    filter_prix_min = session.get('filter_prix_min')
-    filter_prix_max = session.get('filter_prix_max')
-    filter_types = session.get('filter_types', [])
-
-    if filter_word or filter_prix_min is not None or filter_prix_max is not None or filter_types:
-        telephones_filtres = []
-
-        for tel in telephones:
-            match = True
-            if filter_word and not (filter_word.lower() in tel["nom_telephone"].lower() or filter_word.lower() in tel["type"].lower()):
-                match = False
-            if filter_prix_min is not None and tel["prix_telephone"] < filter_prix_min:
-                match = False
-            if filter_prix_max is not None and tel["prix_telephone"] > filter_prix_max:
-                match = False
-            if filter_types and tel["id_type"] not in filter_types:
-                match = False
-
-            if match:
-                telephones_filtres.append(tel)
-
-        if telephones_filtres:
-            telephones = telephones_filtres
-
-    print(" Téléphones après filtrage :", telephones)
-
-    sql = '''
-    SELECT id_type_telephone, libelle_type_telephone as libelle
-    FROM type_telephone 
-    ORDER BY libelle_type_telephone;
-    '''
-    mycursor.execute(sql)
+    mycursor.execute('''
+        SELECT id_type_telephone, libelle_type_telephone as libelle
+        FROM type_telephone 
+        ORDER BY libelle_type_telephone;
+    ''')
     types_telephone = mycursor.fetchall()
 
-    sql = '''
-    SELECT ligne_panier.telephone_id, ligne_panier.quantite, 
-           telephone.nom_telephone AS nom_telephone,  
-           telephone.prix_telephone AS prix_telephone,
-           telephone.stock AS stock,  
-           (ligne_panier.quantite * telephone.prix_telephone) AS prix_ligne
-    FROM ligne_panier
-    JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
-    WHERE ligne_panier.utilisateur_id = %s;
-    '''
-    mycursor.execute(sql, (id_client,))
-    telephones_panier = mycursor.fetchall()
-
-    prix_total = None
-    if len(telephones_panier) >= 1:
-        sql = '''
-        SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
+    mycursor.execute('''
+        SELECT ligne_panier.telephone_id, ligne_panier.quantite, 
+               telephone.nom_telephone AS nom_telephone,  
+               telephone.prix_telephone AS prix_telephone,
+               telephone.stock AS stock,  
+               (ligne_panier.quantite * telephone.prix_telephone) AS prix_ligne
         FROM ligne_panier
         JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
         WHERE ligne_panier.utilisateur_id = %s;
-        '''
-        mycursor.execute(sql, (id_client,))
+    ''', (id_client,))
+    telephones_panier = mycursor.fetchall()
+
+    prix_total = None
+    if telephones_panier:
+        mycursor.execute('''
+            SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
+            FROM ligne_panier
+            JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
+            WHERE ligne_panier.utilisateur_id = %s;
+        ''', (id_client,))
         result = mycursor.fetchone()
         prix_total = result['prix_total']
 
@@ -100,5 +127,4 @@ def client_telephone_show():
                            filter_word=filter_word,
                            filter_prix_min=filter_prix_min,
                            filter_prix_max=filter_prix_max,
-                           filter_types=filter_types
-                           )
+                           filter_types=filter_types)
