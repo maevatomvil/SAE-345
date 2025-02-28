@@ -22,14 +22,12 @@ def client_telephone_show():
             if isinstance(item, str) and item.isdigit():
                 filter_types.append(int(item))
 
-        # Conversion prix min avec gestion d'erreur individuelle
         try:
             filter_prix_min = float(filter_prix_min) if filter_prix_min else None
         except ValueError:
             filter_prix_min = None
             flash("Le prix minimum n'est pas valide.", "alert-warning")
-        
-        # Conversion prix max avec gestion d'erreur individuelle  
+
         try:
             filter_prix_max = float(filter_prix_max) if filter_prix_max else None
         except ValueError:
@@ -97,7 +95,7 @@ def client_telephone_show():
     types_telephone = mycursor.fetchall()
 
     mycursor.execute('''
-        SELECT ligne_panier.telephone_id, ligne_panier.quantite, 
+        SELECT ligne_panier.telephone_id AS id_telephone, ligne_panier.quantite, 
                telephone.nom_telephone AS nom_telephone,  
                telephone.prix_telephone AS prix_telephone,
                telephone.stock AS stock,  
