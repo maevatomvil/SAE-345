@@ -25,9 +25,9 @@ def client_commande_valide():
     WHERE ligne_panier.utilisateur_id = %s
     '''
     mycursor.execute(sql, (id_client,))
-    telephones_panier = mycursor.fetchall()
+    telephone_panier = mycursor.fetchall()
     prix_total = None
-    if len(telephones_panier) >= 1:
+    if len(telephone_panier) >= 1:
         sql = '''
         SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
         FROM ligne_panier
@@ -43,11 +43,9 @@ def client_commande_valide():
     mycursor.execute(sql, id_client)
     adresses = mycursor.fetchall()
 
-    #commande_adresses = dict(list(adresse_livraison.items()) + list(adresse_facturation.items()))
-
     return render_template('client/boutique/panier_validation_adresses.html'
                            , adresses=adresses
-                           , telephones_panier=telephones_panier
+                           , telephone_panier=telephone_panier
                            , prix_total= prix_total
                            , validation=1
                            #, id_adresse_fav=id_adresse_fav
