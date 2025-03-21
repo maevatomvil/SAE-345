@@ -13,8 +13,8 @@
          </h2>
         <div class="card-body">
         {%  if telephone.image is not none %}
-            <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ telephone.image }}"  alt="image  de {{ telephone.nom }}" >
-        {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ telephone.nom }}" >
+            <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ telephone.image }}"  alt="image  de {{ telephone.nom_telephone }}" >
+        {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ telephone.nom_telephone }}" >
         {% endif %}
 
 
@@ -31,10 +31,10 @@
     <div class="row">
 
     <div class="col-12">
-        {% if telephone.moyenne_notes is not defined or  telephone.nb_notes is not defined or  telephone.moyenne_notes == None %}
+        {% if telephone.note_moyenne is not defined or  telephone.nb_notes is not defined or  telephone.note_moyenne == None %}
             <strong>Pas de Note</strong>
         {% else %}
-            <strong>Note moyenne de cet telephone : {{ telephone.moyenne_notes }}</strong>&nbsp;({{ telephone.nb_notes }} note(s))
+            <strong>Note moyenne de ce telephone : {{ telephone.note_moyenne }}</strong>&nbsp;({{ telephone.nb_notes }} note(s))
         {% endif %}
     </div>
         {% if commandes_telephones.nb_commandes_telephone is defined and commandes_telephones.nb_commandes_telephone > 0 %}
@@ -63,7 +63,7 @@
                     <form  action="/client/note/add"   method="post" class="row">
                     <input type="hidden" name="id_telephone" value="{{ telephone.id_telephone }}">
                     <div class="col-md-3">
-                        <label for="input_note" class="d-flex justify-content-end align-items-end pe-3">Mettre une note  sur cet telephone : </label>
+                        <label for="input_note" class="d-flex justify-content-end align-items-end pe-3">Mettre une note  sur ce telephone : </label>
                     </div>
                     <div class="col-md-1">
                         <input type="number" name="note" id="input_note" step="0.1" min="0" max="5" class="form-control col-md-2" value="" >
@@ -99,7 +99,7 @@
             ((nb_commentaires.nb_commentaires_utilisateur is defined and nb_commentaires.nb_commentaires_utilisateur <3) or nb_commentaires.nb_commentaires_utilisateur is not defined) %}
           <form  action="/client/commentaire/add"   method="post">
                 <div class="col">
-                  <label for="input_commentaire" class="form-label">Mettez un commentaire sur cet telephone : </label>
+                  <label for="input_commentaire" class="form-label">Mettez un commentaire sur ce téléphone : </label>
                      <textarea name="commentaire" class="form-control" aria-label="Votre commentaire" id="input_commentaire"  placeholder="Votre commentaire"></textarea>
                 </div>
               <input type="hidden" name="action" value="add_commentaire">

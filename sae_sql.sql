@@ -39,6 +39,7 @@ CREATE TABLE telephone (
     marque VARCHAR(50) NOT NULL,
     type_telephone_id INT,
     stock INT,
+    description TEXT,
     image VARCHAR(50),
     PRIMARY KEY(id_telephone),
     FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur),
@@ -171,24 +172,24 @@ INSERT INTO type_telephone(libelle_type_telephone) VALUES
     ('Touches'),
     ('Fixe');
 
-INSERT INTO telephone (nom_telephone, poids, taille, couleur_id, prix_telephone, fournisseur, marque, type_telephone_id, stock, image) VALUES
-    ('iPhone 13 128Go', 174, 6.1, 10, 909.00, 'Apple Store', 'Apple', 1, 45, 'iphone13blanc.jpg'),
-    ('iPhone 13 256Go', 174, 6.1, 2, 1029.00, 'Apple Store', 'Apple', 1, 32, 'iphone13bleu.jpg'),
-    ('iPhone 13 Pro 256Go', 204, 6.1, 9, 1259.00, 'Apple Store', 'Apple', 1, 28, 'iphone13provert.jpg'),
-    ('iPhone 13 Mini 128Go', 140, 5.4, 1, 809.00, 'Apple Store', 'Apple', 1, 15, 'iphone13mininoir.jpg'),
-    ('iPhone 14 128Go', 172, 6.1, 6, 1019.00, 'Apple Store', 'Apple', 1, 52, 'iphone14jaune.jpg'),
-    ('iPhone 14 256Go', 172, 6.7, 4, 1199.00, 'Apple Store', 'Apple', 1, 38, 'iphone14rouge.jpg'),
-    ('iPhone 14 Pro 512Go', 206, 6.1, 11, 1529.00, 'Apple Store', 'Apple', 1, 25, 'iphone14proviolet.jpg'),
-    ('iPhone 14 Pro Max 1To', 240, 6.7, 5, 1829.00, 'Apple Store', 'Apple', 1, 12, 'iphone14promaxgold.jpg'),
-    ('iPhone 15 128Go', 171, 6.1, 7, 1099.00, 'Apple Store', 'Apple', 1, 65, 'iphone15rose.jpg'),
-    ('iPhone 15 Plus 256Go', 201, 6.7, 2, 1299.00, 'Apple Store', 'Apple', 1, 42, 'iphone15plusbleu.jpg'),
-    ('iPhone 15 Pro 256Go', 191, 6.1, 1, 1449.00, 'Apple Store', 'Apple', 1, 35, 'iphone15pronoir.jpg'),
-    ('iPhone 15 256Go', 221, 6.7, 6, 1669.00, 'Apple Store', 'Apple', 1, 28, 'iphone15jaune.jpg'),
-    ('iPhone 16 256Go', 175, 6.1, 10, 1199.00, 'Apple Store', 'Apple', 1, 75, 'iphone16blanc.jpg'),
-    ('iPhone 16 Pro 256Go', 190, 6.1, 1, 1499.00, 'Apple Store', 'Apple', 1, 48, 'iphone16pro.jpg'),
-    ('iPhone 16 Pro Max 1To', 220, 6.7, 8, 1799.00, 'Apple Store', 'Apple', 1, 22, 'iphone16promaxtitan.jpg'),
-    ('iPhone 16 Pro 512Go', 195, 6.1, 3, 1649.00, 'Apple Store', 'Apple', 1, 31, 'iphone16proargent.jpg'),
-    ('iPhone 16 Pro Max 256Go', 225, 6.7, 1, 1649.00, 'Apple Store', 'Apple', 1, 40, 'iphone16promaxnoir.jpg');
+INSERT INTO telephone (nom_telephone, poids, taille, couleur_id, prix_telephone, fournisseur, marque, type_telephone_id, stock, description, image) VALUES
+    ('iPhone 13 128Go', 174, 6.1, 10, 909.00, 'Apple Store', 'Apple', 1, 45, 'vksdsflnvfjbvsfk','iphone13blanc.jpg'),
+    ('iPhone 13 256Go', 174, 6.1, 2, 1029.00, 'Apple Store', 'Apple', 1, 32, 'vksdsflnvfjbvsfk','iphone13bleu.jpg'),
+    ('iPhone 13 Pro 256Go', 204, 6.1, 9, 1259.00, 'Apple Store', 'Apple', 1, 28, 'vksdsflnvfjbvsfk', 'iphone13provert.jpg'),
+    ('iPhone 13 Mini 128Go', 140, 5.4, 1, 809.00, 'Apple Store', 'Apple', 1, 15, 'vksdsflnvfjbvsfk','iphone13mininoir.jpg'),
+    ('iPhone 14 128Go', 172, 6.1, 6, 1019.00, 'Apple Store', 'Apple', 1, 52, 'vksdsflnvfjbvsfk','iphone14jaune.jpg'),
+    ('iPhone 14 256Go', 172, 6.7, 4, 1199.00, 'Apple Store', 'Apple', 1, 38, 'vksdsflnvfjbvsfk','iphone14rouge.jpg'),
+    ('iPhone 14 Pro 512Go', 206, 6.1, 11, 1529.00, 'Apple Store', 'Apple', 1, 25, 'vksdsflnvfjbvsfk','iphone14proviolet.jpg'),
+    ('iPhone 14 Pro Max 1To', 240, 6.7, 5, 1829.00, 'Apple Store', 'Apple', 1, 12, 'vksdsflnvfjbvsfk','iphone14promaxgold.jpg'),
+    ('iPhone 15 128Go', 171, 6.1, 7, 1099.00, 'Apple Store', 'Apple', 1, 65, 'vksdsflnvfjbvsfk','iphone15rose.jpg'),
+    ('iPhone 15 Plus 256Go', 201, 6.7, 2, 1299.00, 'Apple Store', 'Apple', 1, 42, 'vksdsflnvfjbvsfk','iphone15plusbleu.jpg'),
+    ('iPhone 15 Pro 256Go', 191, 6.1, 1, 1449.00, 'Apple Store', 'Apple', 1, 35, 'vksdsflnvfjbvsfk','iphone15pronoir.jpg'),
+    ('iPhone 15 256Go', 221, 6.7, 6, 1669.00, 'Apple Store', 'Apple', 1, 28, 'vksdsflnvfjbvsfk','iphone15jaune.jpg'),
+    ('iPhone 16 256Go', 175, 6.1, 10, 1199.00, 'Apple Store', 'Apple', 1, 75, 'vksdsflnvfjbvsfk','iphone16blanc.jpg'),
+    ('iPhone 16 Pro 256Go', 190, 6.1, 1, 1499.00, 'Apple Store', 'Apple', 1, 48, 'vksdsflnvfjbvsfk','iphone16pronoir.jpg'),
+    ('iPhone 16 Pro Max 1To', 220, 6.7, 8, 1799.00, 'Apple Store', 'Apple', 1, 22, 'vksdsflnvfjbvsfk','iphone16promaxtitan.jpg'),
+    ('iPhone 16 Pro 512Go', 195, 6.1, 3, 1649.00, 'Apple Store', 'Apple', 1, 31, 'vksdsflnvfjbvsfk','iphone16proargent.jpg'),
+    ('iPhone 16 Pro Max 256Go', 225, 6.7, 1, 1649.00, 'Apple Store', 'Apple', 1, 40, 'vksdsflnvfjbvsfk','iphone16promaxnoir.jpg');
 
 INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
     (1,'admin','admin@admin.fr',
