@@ -141,6 +141,7 @@ CREATE TABLE commentaire (
     telephone_id INT,
     texte TEXT,
     date_publication DATETIME,
+    valider BOOLEAN,
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
     FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
 );
@@ -174,22 +175,24 @@ INSERT INTO type_telephone(libelle_type_telephone) VALUES
 
 INSERT INTO telephone (nom_telephone, poids, taille, couleur_id, prix_telephone, fournisseur, marque, type_telephone_id, stock, description, image) VALUES
     ('iPhone 13 128Go', 174, 6.1, 10, 909.00, 'Apple Store', 'Apple', 1, 45, 'vksdsflnvfjbvsfk','iphone13blanc.jpg'),
-    ('iPhone 13 256Go', 174, 6.1, 2, 1029.00, 'Apple Store', 'Apple', 1, 32, 'vksdsflnvfjbvsfk','iphone13bleu.jpg'),
     ('iPhone 13 Pro 256Go', 204, 6.1, 9, 1259.00, 'Apple Store', 'Apple', 1, 28, 'vksdsflnvfjbvsfk', 'iphone13provert.jpg'),
+    ('Nokia 3310 (2017)', 133, 2.4, 1, 59.99, 'Nokia', 'Nokia', 3, 10, 'Téléphone classique avec une batterie longue durée.', 'nokia33102017.jpg'),
+    ('Nokia 3310', 133, 2.4, 2, 59.99, 'Nokia', 'Nokia', 3, 15, 'Modèle emblématique avec jeu Snake.', 'nokia3310.jpg'),
     ('iPhone 13 Mini 128Go', 140, 5.4, 1, 809.00, 'Apple Store', 'Apple', 1, 15, 'vksdsflnvfjbvsfk','iphone13mininoir.jpg'),
-    ('iPhone 14 128Go', 172, 6.1, 6, 1019.00, 'Apple Store', 'Apple', 1, 52, 'vksdsflnvfjbvsfk','iphone14jaune.jpg'),
     ('iPhone 14 256Go', 172, 6.7, 4, 1199.00, 'Apple Store', 'Apple', 1, 38, 'vksdsflnvfjbvsfk','iphone14rouge.jpg'),
     ('iPhone 14 Pro 512Go', 206, 6.1, 11, 1529.00, 'Apple Store', 'Apple', 1, 25, 'vksdsflnvfjbvsfk','iphone14proviolet.jpg'),
     ('iPhone 14 Pro Max 1To', 240, 6.7, 5, 1829.00, 'Apple Store', 'Apple', 1, 12, 'vksdsflnvfjbvsfk','iphone14promaxgold.jpg'),
+    ('Nokia 2660 Flip', 123, 2.8, 3, 79.99, 'Nokia', 'Nokia', 2, 20, 'Téléphone à clapet pratique pour seniors.', 'nokia2660flip.jpg'),
+    ('Doro 2820', 110, 2.8, 4, 89.99, 'Doro', 'Doro', 2, 25, 'Téléphone adapté aux personnes âgées avec assistance SOS.', 'doro2820blanc.jpg'),
     ('iPhone 15 128Go', 171, 6.1, 7, 1099.00, 'Apple Store', 'Apple', 1, 65, 'vksdsflnvfjbvsfk','iphone15rose.jpg'),
-    ('iPhone 15 Plus 256Go', 201, 6.7, 2, 1299.00, 'Apple Store', 'Apple', 1, 42, 'vksdsflnvfjbvsfk','iphone15plusbleu.jpg'),
     ('iPhone 15 Pro 256Go', 191, 6.1, 1, 1449.00, 'Apple Store', 'Apple', 1, 35, 'vksdsflnvfjbvsfk','iphone15pronoir.jpg'),
     ('iPhone 15 256Go', 221, 6.7, 6, 1669.00, 'Apple Store', 'Apple', 1, 28, 'vksdsflnvfjbvsfk','iphone15jaune.jpg'),
     ('iPhone 16 256Go', 175, 6.1, 10, 1199.00, 'Apple Store', 'Apple', 1, 75, 'vksdsflnvfjbvsfk','iphone16blanc.jpg'),
     ('iPhone 16 Pro 256Go', 190, 6.1, 1, 1499.00, 'Apple Store', 'Apple', 1, 48, 'vksdsflnvfjbvsfk','iphone16pronoir.jpg'),
     ('iPhone 16 Pro Max 1To', 220, 6.7, 8, 1799.00, 'Apple Store', 'Apple', 1, 22, 'vksdsflnvfjbvsfk','iphone16promaxtitan.jpg'),
     ('iPhone 16 Pro 512Go', 195, 6.1, 3, 1649.00, 'Apple Store', 'Apple', 1, 31, 'vksdsflnvfjbvsfk','iphone16proargent.jpg'),
-    ('iPhone 16 Pro Max 256Go', 225, 6.7, 1, 1649.00, 'Apple Store', 'Apple', 1, 40, 'vksdsflnvfjbvsfk','iphone16promaxnoir.jpg');
+    ('Alcatel XL585 Solo', 105, 2.6, 5, 49.99, 'Alcatel', 'Alcatel', 4, 30, 'Téléphone avec grandes touches pour une utilisation facile.', 'alcatelXL585solo.jpg'),
+    ('Essentielb Tribu Duo-R V3', 120, 2.4, 6, 39.99, 'Essentielb', 'Essentielb', 4, 18, 'Téléphone simple et efficace avec double SIM.', 'essentielbtribuduo-Rv3.jpg');
 
 INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
     (1,'admin','admin@admin.fr',
@@ -241,14 +244,12 @@ INSERT INTO historique (utilisateur_id, telephone_id, date_consultation) VALUES
     (3, 5, '2025-01-10 09:00:00');
 
 INSERT INTO note (utilisateur_id, telephone_id, note) VALUES
-    (1, 1, 5),
     (2, 3, 4),
     (3, 5, 3);
 
-INSERT INTO commentaire (utilisateur_id, telephone_id, texte, date_publication) VALUES
-    (1, 1, 'Super téléphone !', '2025-02-01 12:00:00'),
-    (2, 3, 'Bon rapport qualité/prix.', '2025-02-05 14:30:00'),
-    (3, 5, 'Un peu cher mais performant.', '2025-02-10 18:00:00');
+INSERT INTO commentaire (utilisateur_id, telephone_id, texte, date_publication, valider) VALUES
+    (2, 3, 'Bon rapport qualité/prix.', '2025-02-05 14:30:00', 0),
+    (3, 5, 'Un peu vieux mais pratique.', '2025-02-10 18:00:00', 0);
 
 INSERT INTO liste_envie (utilisateur_id, telephone_id, date_consultation) VALUES
     (2, 15, '2024-02-20 10:15:00'),

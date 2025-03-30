@@ -17,7 +17,7 @@ admin_telephone = Blueprint('admin_telephone', __name__,
 @admin_telephone.route('/admin/telephone/show')
 def show_telephone():
     mycursor = get_db().cursor()
-
+    id_telephone = request.args.get('id_telephone')
     filter_stock = request.args.get('filter_stock')
 
     sql = '''
@@ -32,10 +32,11 @@ def show_telephone():
         COALESCE(telephone.marque, 'N/A') as marque,
         telephone.stock, 
         telephone.image, 
-        type_telephone.libelle_type_telephone as libelle
-    FROM telephone
+        type_telephone.libelle_type_telephone as libelle,
+        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = telephone.id_telephone AND commentaire.valider = 0) AS nb_commentaires_nouveaux
+        FROM telephone
     LEFT JOIN type_telephone ON telephone.type_telephone_id = type_telephone.id_type_telephone
-    '''
+        '''
 
     params = []
     if filter_stock == 'low':
@@ -44,8 +45,8 @@ def show_telephone():
         sql += ' WHERE telephone.stock = 0'
 
     sql += ' ORDER BY telephone.nom_telephone'
-
     mycursor.execute(sql, params)
+
     telephones = mycursor.fetchall()
 
     return render_template('admin/telephone/show_telephone.html',
@@ -308,7 +309,7 @@ def admin_avis(id):
 @admin_telephone.route('/admin/comment/delete', methods=['POST'])
 def admin_avis_delete():
     mycursor = get_db().cursor()
-    telephone_id = request.form.get('idtelephone', None)
+    telephone_id = request.form.get('id_telephone', None)
     userId = request.form.get('idUser', None)
 
     return admin_avis(telephone_id)

@@ -46,7 +46,7 @@ def client_telephone_details():
         abort(404, "pb id telephone")
 
     sql = ''' SELECT commentaire.texte AS commentaire, commentaire.date_publication, utilisateur.nom AS nom, 
-     commentaire.utilisateur_id AS id_utilisateur, commentaire.telephone_id AS id_telephone
+     commentaire.utilisateur_id AS id_utilisateur, commentaire.telephone_id AS id_telephone, commentaire.valider AS valider
      FROM commentaire
      JOIN utilisateur ON commentaire.utilisateur_id = utilisateur.id_utilisateur
      WHERE commentaire.telephone_id = %s
@@ -75,13 +75,14 @@ def client_telephone_details():
     sql = '''
     SELECT 
         (SELECT COUNT(*) FROM commentaire WHERE telephone_id = %s) AS nb_commentaires_total,
-        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = %s AND utilisateur_id = %s) AS nb_commentaires_utilisateur
-    '''
-    mycursor.execute(sql, (id_telephone, id_telephone, id_client))
+        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = %s AND utilisateur_id = %s) AS nb_commentaires_utilisateur,
+        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = %s AND valider = 1) AS nb_commentaires_total_valide,
+        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = %s AND utilisateur_id = %s AND valider = 1) AS nb_commentaires_utilisateur_valide;'''
+    mycursor.execute(sql, (id_telephone, id_telephone, id_client, id_telephone, id_telephone, id_client))
     nb_commentaires = mycursor.fetchone()
 
     if nb_commentaires['nb_commentaires_utilisateur'] == 3:
-        flash('/!\ Vous ne pouvez plus entrer de commentaires', 'warning')
+        flash('/!\ Vous ne pouvez plus entrer de commentaires', 'alert-warning')
 
     return render_template('client/telephone_info/telephone_details.html'
                            , telephone=telephone
@@ -106,8 +107,8 @@ def client_comment_add():
 
     tuple_insert = (commentaire, id_client, id_telephone)
     print(tuple_insert)
-    sql = ''' INSERT INTO commentaire(texte, utilisateur_id, telephone_id, date_publication) 
-    VALUES (%s, %s, %s, current_timestamp);'''
+    sql = ''' INSERT INTO commentaire(texte, utilisateur_id, telephone_id, date_publication, valider) 
+    VALUES (%s, %s, %s, current_timestamp, 0);'''
     mycursor.execute(sql, tuple_insert)
     get_db().commit()
     return redirect('/client/telephone/details?id_telephone='+id_telephone)

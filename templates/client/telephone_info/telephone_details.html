@@ -91,7 +91,7 @@
           {% if nb_commentaires.nb_commentaires_utilisateur_valide is not defined or nb_commentaires.nb_commentaires_total_valide is not defined %}
                <strong>NB commentaire(s) valide(s) not defined</strong>
               {% else %}
-           Nombre de commentaire(s) validé(s) total de l'utilisateur :  {{nb_commentaires.nb_commentaires_utilisateur_valide }} /  Nombre de commentaire(s) validé(s) {{nb_commentaires.nb_commentaires_total_valide }}<br>
+           Nombre de commentaire(s) validé(s) total de l'utilisateur :  {{nb_commentaires.nb_commentaires_utilisateur_valide }} /  Nombre de commentaire(s) validé(s) : {{nb_commentaires.nb_commentaires_total_valide }}<br>
           {% endif %}
         {% endif %}
       </div>

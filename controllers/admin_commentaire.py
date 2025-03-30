@@ -13,12 +13,32 @@ admin_commentaire = Blueprint('admin_commentaire', __name__,
 def admin_telephone_details():
     mycursor = get_db().cursor()
     id_telephone =  request.args.get('id_telephone', None)
-    sql = '''    requête admin_type_telephone_1    '''
-    commentaires = {}
-    sql = '''   requête admin_type_telephone_1_bis   '''
-    telephone = []
-    sql = '''   requête admin_type_telephone_1_3   '''
-    nb_commentaires = []
+    id_utilisateur = request.args.get('id_utilisateur', None)
+    sql = ''' SELECT commentaire.texte AS commentaire, commentaire.date_publication, utilisateur.nom AS nom, 
+     commentaire.utilisateur_id AS id_utilisateur, commentaire.telephone_id As id_telephone, commentaire.valider AS valider
+     FROM commentaire
+     JOIN utilisateur ON commentaire.utilisateur_id = utilisateur.id_utilisateur
+     WHERE commentaire.telephone_id = %s
+     ORDER BY commentaire.date_publication DESC, commentaire.valider ASC;'''
+    mycursor.execute(sql, (id_telephone,))
+    commentaires = mycursor.fetchall()
+
+    sql = ''' SELECT telephone.nom_telephone, COUNT(note) AS nb_notes, AVG(note) AS moyenne_notes, telephone.id_telephone
+     FROM telephone
+     LEFT JOIN note ON telephone.id_telephone = note.telephone_id
+     LEFT JOIN commentaire ON telephone.id_telephone = commentaire.telephone_id
+     WHERE id_telephone = %s 
+     GROUP BY telephone.nom_telephone, telephone.id_telephone;'''
+    mycursor.execute(sql, (id_telephone,))
+    telephone = mycursor.fetchone()
+
+    sql = ''' 
+    SELECT
+        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = %s) AS nb_commentaires_total,
+        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = %s AND valider = 1) AS nb_commentaires_valider'''
+    mycursor.execute(sql, (id_telephone, id_telephone))
+    nb_commentaires = mycursor.fetchone()
+
     return render_template('admin/telephone/show_telephone_commentaires.html'
                            , commentaires=commentaires
                            , telephone=telephone
@@ -31,8 +51,9 @@ def admin_comment_delete():
     id_utilisateur = request.form.get('id_utilisateur', None)
     id_telephone = request.form.get('id_telephone', None)
     date_publication = request.form.get('date_publication', None)
-    sql = '''    requête admin_type_telephone_2   '''
+    sql = ''' DELETE FROM commentaire WHERE utilisateur_id = %s AND telephone_id = %s AND date_publication = %s; '''
     tuple_delete=(id_utilisateur,id_telephone,date_publication)
+    mycursor.execute(sql, tuple_delete)
     get_db().commit()
     return redirect('/admin/telephone/commentaires?id_telephone='+id_telephone)
 
@@ -50,7 +71,10 @@ def admin_comment_add():
     id_telephone = request.form.get('id_telephone', None)
     date_publication = request.form.get('date_publication', None)
     commentaire = request.form.get('commentaire', None)
-    sql = '''    requête admin_type_telephone_3   '''
+    tuple_insert = (commentaire, id_utilisateur, id_telephone)
+    sql = ''' INSERT INTO commentaire(texte, utilisateur_id, telephone_id, date_publication, valider) 
+    VALUES (%s, %s, %s, current_timestamp, 1); '''
+    mycursor.execute(sql, tuple_insert)
     get_db().commit()
     return redirect('/admin/telephone/commentaires?id_telephone='+id_telephone)
 
@@ -59,6 +83,7 @@ def admin_comment_add():
 def admin_comment_valider():
     id_telephone = request.args.get('id_telephone', None)
     mycursor = get_db().cursor()
-    sql = '''   requête admin_type_telephone_4   '''
+    sql = ''' UPDATE commentaire SET valider = 1 WHERE telephone_id = %s '''
+    mycursor.execute(sql, (id_telephone,))
     get_db().commit()
     return redirect('/admin/telephone/commentaires?id_telephone='+id_telephone)

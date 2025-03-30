@@ -9,7 +9,7 @@ admin_dataviz = Blueprint('admin_dataviz', __name__,
                         template_folder='templates')
 
 @admin_dataviz.route('/admin/dataviz/etat1')
-def show_type_telephone_stock():
+def show_type_telephone_commentaire():
     mycursor = get_db().cursor()
     sql = '''
     
@@ -61,5 +61,3 @@ def show_dataviz_map():
     return render_template('admin/dataviz/dataviz_etat_map.html'
                            , adresses=adresses
                           )
-
-
