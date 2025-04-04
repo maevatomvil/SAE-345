@@ -1,0 +1,71 @@
+{#
+telephone (dictionnaire)
+id_telephone, nom, type_telephone_id, prix, image
+    * option :
+        * stock ,
+        * nb_avis ,
+        * nb_declinaisons
+
+types_telephone : tableau de dictionnaires
+* tableau de "type_telephone"
+    * id_type_telephone, libelle
+#}
+
+{% extends 'admin/layout_admin.html' %}
+{% block title %}
+    <title>Modifier un telephone</title>
+{% endblock %}
+
+{% block body %}
+    <h2>Modifier un telephone</h2>
+    <div class="row mt-5">
+        {%  if telephone.image is not none %}
+            <img class="card-img-top rounded mx-4 d-block"  style="width:200px; height:200px; border: 1px solid black; padding: 25px;"   id="img_output" src="{{ url_for('static', filename = 'images/') }}{{ telephone.image}}"  alt="image  de {{ telephone.nom }}" >
+        {% endif %}
+        <div class="w-25">
+            <form class="w-190" method="post" action="/admin/telephone/edit" enctype="multipart/form-data">
+                <input type="hidden" value="{{ telephone.id_telephone }}" name="id_telephone">
+                <label for="nom">Nom :
+                    <input name="nom" type="text" value="{{ telephone.nom }}" class="form-control" required>
+                </label>
+                <label for="prix">Prix (€) :
+                    <input name="prix" type="number" min="0.0" step="0.01" value="{{ telephone.prix }}" class="form-control" required>
+                </label>
+                <label for="poids">Poids (g) :
+                    <input name="poids" type="number" min="0" value="{{ telephone.poids if telephone.poids is not none else '' }}" class="form-control" required>
+                </label>
+                <label for="taille">Taille (cm) :
+                    <input name="taille" type="number" min="0.0" max="9.9" step="0.1" value="{{ telephone.taille if telephone.taille is not none else '' }}" class="form-control" required>
+                </label>
+                <label for="fournisseur">Fournisseur :
+                    <input name="fournisseur" type="text" value="{{ telephone.fournisseur if telephone.fournisseur is not none else '' }}" class="form-control" required>
+                </label>
+                <label for="marque">Marque :
+                    <input name="marque" type="text" value="{{ telephone.marque if telephone.marque is not none else '' }}" class="form-control" required>
+                </label>
+                <label for="stock">Stock :
+                    <input name="stock" type="number" min="0" value="{{ telephone.stock }}" class="form-control" required>
+                </label>
+                <label for="image">Image :
+                    <input name="image" type="file" onchange="loadFile(event)" class="form-control">
+                </label>
+
+                <label for="type_telephone_id">Type de l'telephone :
+                    <select name="type_telephone_id" class="form-select">
+                        {% for type in types_telephone %}
+                             <option value="{{ type.id_type_telephone }}"
+                                     {% if type.id_type_telephone == telephone.type_telephone_id %} selected {% endif %}>
+                                 {{ type.libelle }}
+                             </option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <br>
+                <button class="btn btn-primary mt-2">
+                    Modifier
+                </button>
+                <a class="btn btn-secondary mt-2" href="/admin/telephone/show" role="button">Retour</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -33,4 +33,20 @@ ENV/
 
 # Système
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Fichiers de configuration
+*.log
+*.sqlite
+*.db
+
+# Fichiers de cache
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Fichiers de déploiement
+*.env
+*.env.local
+*.env.*.local

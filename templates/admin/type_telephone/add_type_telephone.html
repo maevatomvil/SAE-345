@@ -1,0 +1,24 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block title %}
+    <title>Ajouter un type de téléphone</title>
+{% endblock %}
+
+{% block body %}
+  {% if error %}
+    <p class=error><strong>Error:</strong> {{ error }}
+  {% endif %}
+  <form method="post" action="/admin/type-telephone/add">
+    <fieldset>
+        <legend>Créer un type de téléphone</legend>
+        <div class="mb-3">
+            <label class="form-label" for="libelle">Libellé</label><br>
+            <input class="form-control" id="libelle" type="text" name="libelle" size="18" value="" placeholder="Saisir le libelle du type de l'telephone" required><br>
+        </div>
+        <div class="col-12">
+            <button class="btn btn-primary" type="submit">Valider</button>
+            <a href="/admin/type-telephone/show" class="btn btn-secondary">Annuler</a>
+        </div>
+    </fieldset>
+  </form>
+{% endblock %}

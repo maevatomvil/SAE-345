@@ -1,0 +1,54 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block title %}
+    <title>Ajouter un telephone</title>
+{% endblock %}
+
+{% block body %}
+    <h2>Ajouter un telephone</h2>
+    <div class="row mt-5">
+        <img class="card-img-top rounded mx-4 d-block"  style="width:200px; height:200px; border: 1px solid black; padding: 5px;" id="img_output" src="{{ url_for('static', filename = 'images/')}}no_photo.jpeg" alt="">
+        <div class="w-25">
+            <form class="w-190" method="post" action="/admin/telephone/add" enctype="multipart/form-data">
+                <label for="nom">Nom :
+                    <input name="nom" type="text" value=""  class="form-control" required>
+                </label>
+                <label for="prix">Prix (€) :
+                    <input name="prix" type="number" min="0.0" step="0.01" max="2147483647" value=""  class="form-control" required>
+                </label>
+                <label for="poids">Poids (g) :
+                    <input name="poids" type="number" min="0" value=""  class="form-control" required>
+                </label>
+                <label for="taille">Taille (cm) :
+                    <input name="taille" type="number" min="0.0" max="9.9" step="0.1" value="" class="form-control" required>
+                </label>
+                <label for="fournisseur">Fournisseur :
+                    <input name="fournisseur" type="text" value="" class="form-control" required>
+                </label>
+                <label for="marque">Marque :
+                    <input name="marque" type="text" value="" class="form-control" required>
+                </label>
+                <label for="stock">Stock :
+                    <input name="stock" type="number" min="0" value="0" class="form-control" required>
+                </label>
+                <label for="image"> Image :
+                    <input name="image" type="file" onchange="loadFile(event)"   class="form-control">
+                </label>
+
+                <label for="type_telephone_id">Type de l'telephone :
+                    <select name="type_telephone_id" required class="form-select">
+                        <option value="">Sélectionner un type d'telephone</option>
+                        {% for type in types_telephone %}
+                             <option value="{{ type.id_type_telephone }}"> {{ type.libelle }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <br>
+                <button class="btn btn-primary mt-2">
+                    Ajouter
+                </button>
+                <a class="btn btn-secondary mt-2" href="/admin/telephone/show" role="button">Retour</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

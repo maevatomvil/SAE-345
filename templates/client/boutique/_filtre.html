@@ -1,0 +1,35 @@
+<form method="post" action="/client/telephone/show">
+  <div class="form-group">
+      <input name="filter_word" type="text" placeholder="Recherche" size="10" class="form-control"
+             value="{% if session.get('filter_word') %}{{ session.get('filter_word') }}{% endif %}">
+  </div>
+
+  {% if items_filtre is defined %}
+  <div class="form-group">
+      <h4>Types téléphones</h4>
+      {% for item_filtre in items_filtre %}
+      <div class="form-check">
+          <input type="checkbox" class="form-check-input" name="filter_types[]" value="{{ item_filtre.id_type_telephone }}"
+            {% if session.get('filter_types', []) and item_filtre.id_type_telephone in session.get('filter_types', []) %}
+              checked
+            {% endif %}>
+          <label class="form-check-label">{{ item_filtre.libelle }}</label>
+      </div>
+      {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="form-group">
+      <h5>Prix :</h5>
+      <input name="filter_prix_min" type="number" placeholder="min" size="3" min="0"
+          value="{% if session.get('filter_prix_min') %}{{ session.get('filter_prix_min') }}{% endif %}">
+      <input name="filter_prix_max" type="number" placeholder="max" size="3" min="0"
+          value="{% if session.get('filter_prix_max') %}{{ session.get('filter_prix_max') }}{% endif %}">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Filtrer</button>
+
+  {% if session.get('filter_word') or session.get('filter_prix_min') or session.get('filter_prix_max') or session.get('filter_types') %}
+  <button type="submit" formaction="/client/panier/filtre/suppr" class="btn btn-primary">Réinitialiser</button>
+  {% endif %}
+</form>
