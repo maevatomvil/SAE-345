@@ -55,7 +55,18 @@ def client_telephone_show():
               telephone.fournisseur AS fournisseur,
               telephone.marque AS marque,
               telephone.stock AS stock,
-              telephone.image AS image
+              telephone.image AS image,
+              (SELECT COUNT(*) FROM declinaison_telephone WHERE telephone_id = telephone.id_telephone) AS nombre_declinaisons,
+              (SELECT COALESCE(SUM(stock), telephone.stock) 
+               FROM declinaison_telephone 
+               WHERE telephone_id = telephone.id_telephone) AS stock_total,
+              (SELECT GROUP_CONCAT(
+                    CONCAT(taille, ' (', stock, ')')
+                    ORDER BY taille
+                    SEPARATOR ' | '
+               )
+               FROM declinaison_telephone 
+               WHERE telephone_id = telephone.id_telephone) AS details_stock
        FROM telephone
        JOIN couleur ON telephone.couleur_id = couleur.id_couleur
        JOIN type_telephone ON telephone.type_telephone_id = type_telephone.id_type_telephone
@@ -97,11 +108,17 @@ def client_telephone_show():
     mycursor.execute('''
         SELECT ligne_panier.telephone_id AS id_telephone, ligne_panier.quantite, 
                telephone.nom_telephone AS nom_telephone,  
-               telephone.prix_telephone AS prix_telephone,
-               telephone.stock AS stock,  
-               (ligne_panier.quantite * telephone.prix_telephone) AS prix_ligne
+               COALESCE(declinaison_telephone.prix, telephone.prix_telephone) AS prix_telephone,
+               COALESCE(declinaison_telephone.stock, telephone.stock) AS stock,  
+               (ligne_panier.quantite * COALESCE(declinaison_telephone.prix, telephone.prix_telephone)) AS prix_ligne,
+               declinaison_telephone.taille,
+               couleur.libelle_couleur,
+               ligne_panier.declinaison_id,
+               ligne_panier.prix_unitaire
         FROM ligne_panier
         JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
+        LEFT JOIN declinaison_telephone ON ligne_panier.declinaison_id = declinaison_telephone.id_declinaison
+        LEFT JOIN couleur ON declinaison_telephone.couleur_id = couleur.id_couleur
         WHERE ligne_panier.utilisateur_id = %s;
     ''', (id_client,))
     telephones_panier = mycursor.fetchall()
@@ -109,9 +126,10 @@ def client_telephone_show():
     prix_total = None
     if telephones_panier:
         mycursor.execute('''
-            SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
+            SELECT SUM(ligne_panier.quantite * COALESCE(ligne_panier.prix_unitaire, telephone.prix_telephone)) AS prix_total
             FROM ligne_panier
             JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
+            LEFT JOIN declinaison_telephone ON ligne_panier.declinaison_id = declinaison_telephone.id_declinaison
             WHERE ligne_panier.utilisateur_id = %s;
         ''', (id_client,))
         result = mycursor.fetchone()

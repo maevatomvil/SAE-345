@@ -12,21 +12,28 @@
             {% for items_panier in telephone_panier %}
                 <tr>
                     <td>{{items_panier.nom_telephone}}
-                        {% if items_panier.couleur_id is defined and items_panier.couleur_id != None and items_panier.couleur_id >1 %}
-                            <small style="color: #6dcea2">({{ items_panier.libelle_couleur }})</small>
+                        {% if items_panier.taille is defined and items_panier.taille != None %}
+                            <small style="color: #d941c2">({{ items_panier.taille }})</small>
                         {% endif %}
-                        {% if items_panier.taille is defined and items_panier.taille != None and items_panier.taille >1 %}
-                            <small style="color: #d941c2">({{ items_panier.libelle_taille }})</small>
+                        {% if items_panier.libelle_couleur is defined and items_panier.libelle_couleur != None %}
+                            <small style="color: #6dcea2">({{ items_panier.libelle_couleur }})</small>
                         {% endif %}
                     </td>
                     <td>{{items_panier.quantite}}</td>
-                    <td>{{items_panier.prix_telephone}}</td>
-                    <td>{{ "{:,.2f} €".format((items_panier.prix_telephone * items_panier.quantite)) }}{#{(panier.telephone.prix * panier.quantite)|number_format(2) }#}</td>
+                    <td>{% if items_panier.prix_unitaire is defined and items_panier.prix_unitaire != None %}
+                            {{ items_panier.prix_unitaire }}
+                        {% else %}
+                            {{ items_panier.prix_telephone }}
+                        {% endif %}
+                    </td>
+                    <td>{{ "{:,.2f} €".format((items_panier.quantite * (items_panier.prix_unitaire or items_panier.prix_telephone))) }}</td>
                     <td>
                         {# #}                            {% if items_panier.stock is defined %}
                         {# #}                               {% if items_panier.stock > 0 %}
                         <form action="/client/panier/add"  style="display: inline-block;"  method="post">
-                            {# <input type="hidden" name="id_declinaison_telephone" value="{{ item_panier.id_declinaison_telephone }}"> #}
+                            {% if items_panier.declinaison_id is defined and items_panier.declinaison_id != None %}
+                                <input type="hidden" name="id_declinaison" value="{{ items_panier.declinaison_id }}">
+                            {% endif %}
                             <input type="hidden" name="quantite" value="1">
                             <input type="hidden" name="id_telephone" value="{{ items_panier.id_telephone }}">
                             <button class="btn btn-primary" > + </button>
@@ -34,13 +41,17 @@
                             {# #}                               {% endif %}
                         {# #}                           {% endif %}
                         <form action="/client/panier/delete"   style="display: inline-block;"  method="post">
-                            {# <input type="hidden" name="id_declinaison_telephone" value="{{ item_panier.id_declinaison_telephone }}"> #}
+                            {% if items_panier.declinaison_id is defined and items_panier.declinaison_id != None %}
+                                <input type="hidden" name="id_declinaison" value="{{ items_panier.declinaison_id }}">
+                            {% endif %}
                             <input type="hidden" name="id_telephone" value="{{ items_panier.id_telephone }}">
                             <button class="btn btn-primary" > - </button>
                         </form>
 
                         <form action="/client/panier/delete/line"  style="display: inline-block;"  method="post">
-                            {# <input type="hidden" name="id_declinaison_telephone" value="{{ item_panier.id_declinaison_telephone }}"> #}
+                            {% if items_panier.declinaison_id is defined and items_panier.declinaison_id != None %}
+                                <input type="hidden" name="id_declinaison" value="{{ items_panier.declinaison_id }}">
+                            {% endif %}
                             <input type="hidden" name="id_telephone" value="{{ items_panier.id_telephone }}">
                             <button class="btn btn-primary" >Supprimer</button>
                         </form>
@@ -61,6 +72,9 @@
         {% endif %}
         {% if prix_total %}
             Total à payer : <strong>{{ "{:,.2f} €".format(prix_total) }}</strong>
+            {% if nombre_articles is defined %}
+                <br>Nombre d'articles : <strong>{{ nombre_articles }}</strong>
+            {% endif %}
         {% endif %}
     {% endif %}
 </div>

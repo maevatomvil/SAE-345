@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS ligne_commande;
 DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS adresse;
 DROP TABLE IF EXISTS ligne_panier;
+DROP TABLE IF EXISTS declinaison_telephone;
 DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS telephone;
@@ -46,6 +47,18 @@ CREATE TABLE telephone (
     FOREIGN KEY (type_telephone_id) REFERENCES type_telephone(id_type_telephone)
 );
 
+CREATE TABLE declinaison_telephone (
+    id_declinaison INT AUTO_INCREMENT,
+    telephone_id INT,
+    taille VARCHAR(50),
+    stock INT,
+    prix DECIMAL(15,2),
+    couleur_id INT,
+    PRIMARY KEY(id_declinaison),
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur)
+);
+
 CREATE TABLE utilisateur (
     id_utilisateur INT AUTO_INCREMENT,
     login VARCHAR(50),
@@ -68,9 +81,12 @@ CREATE TABLE ligne_panier (
     telephone_id INT,
     date_ajout DATETIME,
     quantite INT,
+    declinaison_id INT,
+    prix_unitaire DECIMAL(15,2),
     PRIMARY KEY (utilisateur_id, telephone_id, date_ajout),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
-    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (declinaison_id) REFERENCES declinaison_telephone(id_declinaison)
 );
 
 CREATE TABLE adresse (
@@ -104,9 +120,11 @@ CREATE TABLE ligne_commande (
     telephone_id int(11),
     prix decimal(15,2),
     quantite int(11),
+    declinaison_id INT,
     PRIMARY KEY (commande_id, telephone_id),
     FOREIGN KEY (commande_id) REFERENCES commande(id_commande),
-    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (declinaison_id) REFERENCES declinaison_telephone(id_declinaison)
 );
 
 CREATE TABLE paiement (
@@ -174,25 +192,73 @@ INSERT INTO type_telephone(libelle_type_telephone) VALUES
     ('Fixe');
 
 INSERT INTO telephone (nom_telephone, poids, taille, couleur_id, prix_telephone, fournisseur, marque, type_telephone_id, stock, description, image) VALUES
-    ('iPhone 13 128Go', 174, 6.1, 10, 909.00, 'Apple Store', 'Apple', 1, 45, 'vksdsflnvfjbvsfk','iphone13blanc.jpg'),
-    ('iPhone 13 Pro 256Go', 204, 6.1, 9, 1259.00, 'Apple Store', 'Apple', 1, 28, 'vksdsflnvfjbvsfk', 'iphone13provert.jpg'),
-    ('Nokia 3310 (2017)', 133, 2.4, 1, 59.99, 'Nokia', 'Nokia', 3, 10, 'Téléphone classique avec une batterie longue durée.', 'nokia33102017.jpg'),
-    ('Nokia 3310', 133, 2.4, 2, 59.99, 'Nokia', 'Nokia', 3, 15, 'Modèle emblématique avec jeu Snake.', 'nokia3310.jpg'),
-    ('iPhone 13 Mini 128Go', 140, 5.4, 1, 809.00, 'Apple Store', 'Apple', 1, 15, 'vksdsflnvfjbvsfk','iphone13mininoir.jpg'),
-    ('iPhone 14 256Go', 172, 6.7, 4, 1199.00, 'Apple Store', 'Apple', 1, 38, 'vksdsflnvfjbvsfk','iphone14rouge.jpg'),
-    ('iPhone 14 Pro 512Go', 206, 6.1, 11, 1529.00, 'Apple Store', 'Apple', 1, 25, 'vksdsflnvfjbvsfk','iphone14proviolet.jpg'),
-    ('iPhone 14 Pro Max 1To', 240, 6.7, 5, 1829.00, 'Apple Store', 'Apple', 1, 12, 'vksdsflnvfjbvsfk','iphone14promaxgold.jpg'),
+    ('iPhone 13', 174, 6.1, 10, 909.00, 'Apple Store', 'Apple', 1, 45, 'vksdsflnvfjbvsfk','iphone13blanc.jpg'),
+    ('iPhone 13 Pro', 204, 6.1, 9, 1259.00, 'Apple Store', 'Apple', 1, 28, 'vksdsflnvfjbvsfk', 'iphone13provert.jpg'),
+    ('Nokia 3310 (2017) Classique', 133, 2.4, 1, 59.99, 'Nokia', 'Nokia', 3, 10, 'Téléphone classique avec une batterie longue durée.', 'nokia33102017.jpg'),
+    ('Nokia 3310 Pro', 133, 2.4, 2, 69.99, 'Nokia', 'Nokia', 3, 15, 'Modèle emblématique avec jeu Snake.', 'nokia3310.jpg'),
+    ('iPhone 13 Mini', 140, 5.4, 1, 809.00, 'Apple Store', 'Apple', 1, 15, 'vksdsflnvfjbvsfk','iphone13mininoir.jpg'),
+    ('iPhone 14', 172, 6.7, 4, 1199.00, 'Apple Store', 'Apple', 1, 38, 'vksdsflnvfjbvsfk','iphone14rouge.jpg'),
+    ('iPhone 14 Pro', 206, 6.1, 11, 1529.00, 'Apple Store', 'Apple', 1, 25, 'vksdsflnvfjbvsfk','iphone14proviolet.jpg'),
+    ('iPhone 14 Pro Max', 240, 6.7, 5, 1829.00, 'Apple Store', 'Apple', 1, 12, 'vksdsflnvfjbvsfk','iphone14promaxgold.jpg'),
     ('Nokia 2660 Flip', 123, 2.8, 3, 79.99, 'Nokia', 'Nokia', 2, 20, 'Téléphone à clapet pratique pour seniors.', 'nokia2660flip.jpg'),
     ('Doro 2820', 110, 2.8, 4, 89.99, 'Doro', 'Doro', 2, 25, 'Téléphone adapté aux personnes âgées avec assistance SOS.', 'doro2820blanc.jpg'),
-    ('iPhone 15 128Go', 171, 6.1, 7, 1099.00, 'Apple Store', 'Apple', 1, 65, 'vksdsflnvfjbvsfk','iphone15rose.jpg'),
-    ('iPhone 15 Pro 256Go', 191, 6.1, 1, 1449.00, 'Apple Store', 'Apple', 1, 35, 'vksdsflnvfjbvsfk','iphone15pronoir.jpg'),
-    ('iPhone 15 256Go', 221, 6.7, 6, 1669.00, 'Apple Store', 'Apple', 1, 28, 'vksdsflnvfjbvsfk','iphone15jaune.jpg'),
-    ('iPhone 16 256Go', 175, 6.1, 10, 1199.00, 'Apple Store', 'Apple', 1, 75, 'vksdsflnvfjbvsfk','iphone16blanc.jpg'),
-    ('iPhone 16 Pro 256Go', 190, 6.1, 1, 1499.00, 'Apple Store', 'Apple', 1, 48, 'vksdsflnvfjbvsfk','iphone16pronoir.jpg'),
-    ('iPhone 16 Pro Max 1To', 220, 6.7, 8, 1799.00, 'Apple Store', 'Apple', 1, 22, 'vksdsflnvfjbvsfk','iphone16promaxtitan.jpg'),
-    ('iPhone 16 Pro 512Go', 195, 6.1, 3, 1649.00, 'Apple Store', 'Apple', 1, 31, 'vksdsflnvfjbvsfk','iphone16proargent.jpg'),
+    ('iPhone 15', 171, 6.1, 7, 1099.00, 'Apple Store', 'Apple', 1, 65, 'vksdsflnvfjbvsfk','iphone15rose.jpg'),
+    ('iPhone 15 Pro', 191, 6.1, 1, 1449.00, 'Apple Store', 'Apple', 1, 35, 'vksdsflnvfjbvsfk','iphone15pronoir.jpg'),
+    ('iPhone 15', 221, 6.7, 6, 1669.00, 'Apple Store', 'Apple', 1, 28, 'vksdsflnvfjbvsfk','iphone15jaune.jpg'),
+    ('iPhone 16', 175, 6.1, 10, 1199.00, 'Apple Store', 'Apple', 1, 75, 'vksdsflnvfjbvsfk','iphone16blanc.jpg'),
+    ('iPhone 16 Pro', 190, 6.1, 1, 1499.00, 'Apple Store', 'Apple', 1, 48, 'vksdsflnvfjbvsfk','iphone16pronoir.jpg'),
+    ('iPhone 16 Pro Max', 220, 6.7, 8, 1799.00, 'Apple Store', 'Apple', 1, 22, 'vksdsflnvfjbvsfk','iphone16promaxtitan.jpg'),
+    ('iPhone 16 Pro', 195, 6.1, 3, 1649.00, 'Apple Store', 'Apple', 1, 31, 'vksdsflnvfjbvsfk','iphone16proargent.jpg'),
     ('Alcatel XL585 Solo', 105, 2.6, 5, 49.99, 'Alcatel', 'Alcatel', 4, 30, 'Téléphone avec grandes touches pour une utilisation facile.', 'alcatelXL585solo.jpg'),
     ('Essentielb Tribu Duo-R V3', 120, 2.4, 6, 39.99, 'Essentielb', 'Essentielb', 4, 18, 'Téléphone simple et efficace avec double SIM.', 'essentielbtribuduo-Rv3.jpg');
+
+INSERT INTO declinaison_telephone (telephone_id, taille, stock, prix, couleur_id) VALUES
+    (1, '128Go', 15, 909.00, 10),
+    (1, '256Go', 20, 999.00, 10),
+    (1, '128Go', 10, 909.00, 1),
+    (1, '256Go', 12, 999.00, 1),
+    
+    (2, '128Go', 8, 1199.00, 9),
+    (2, '256Go', 10, 1299.00, 9),
+    (2, '512Go', 5, 1499.00, 9),
+    (2, '128Go', 10, 1199.00, 1),
+    (2, '256Go', 12, 1299.00, 1),
+    
+    (5, '64Go', 5, 709.00, 1),
+    (5, '128Go', 8, 809.00, 1),
+    (5, '64Go', 6, 709.00, 7),
+    (5, '128Go', 7, 809.00, 7),
+    
+    (6, '128Go', 15, 1099.00, 4),
+    (6, '256Go', 18, 1199.00, 4),
+    (6, '128Go', 12, 1099.00, 1),
+    (6, '256Go', 15, 1199.00, 1),
+    
+    (7, '128Go', 8, 1399.00, 11),
+    (7, '256Go', 10, 1499.00, 11),
+    (7, '512Go', 5, 1699.00, 11),
+    (7, '1To', 3, 1899.00, 11),
+    
+    (8, '128Go', 5, 1599.00, 5),
+    (8, '256Go', 7, 1699.00, 5),
+    (8, '512Go', 4, 1899.00, 5),
+    (8, '1To', 3, 2099.00, 5),
+    
+    (11, '128Go', 20, 999.00, 7),
+    (11, '256Go', 25, 1099.00, 7),
+    (11, '128Go', 18, 999.00, 10),
+    (11, '256Go', 22, 1099.00, 10),
+    
+    (12, '128Go', 10, 1349.00, 1),
+    (12, '256Go', 15, 1449.00, 1),
+    (12, '512Go', 8, 1649.00, 1),
+    (12, '128Go', 12, 1349.00, 8),
+    (12, '256Go', 14, 1449.00, 8),
+    
+    (13, '128Go', 12, 1499.00, 6),
+    (13, '256Go', 15, 1599.00, 6),
+    (13, '128Go', 10, 1499.00, 2),
+    (13, '256Go', 13, 1599.00, 2);
 
 INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
     (1,'admin','admin@admin.fr',

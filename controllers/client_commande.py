@@ -17,26 +17,36 @@ def client_commande_valide():
     sql = '''
     SELECT ligne_panier.telephone_id, ligne_panier.quantite, 
            telephone.nom_telephone AS nom_telephone,  
-           telephone.prix_telephone AS prix_telephone,
-           telephone.stock AS stock,  
-           (ligne_panier.quantite * telephone.prix_telephone) AS prix_ligne
+           COALESCE(ligne_panier.prix_unitaire, telephone.prix_telephone) AS prix_telephone,
+           COALESCE(declinaison_telephone.stock, telephone.stock) AS stock,  
+           (ligne_panier.quantite * COALESCE(ligne_panier.prix_unitaire, telephone.prix_telephone)) AS prix_ligne,
+           ligne_panier.declinaison_id,
+           declinaison_telephone.taille,
+           couleur.libelle_couleur
     FROM ligne_panier
     JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
+    LEFT JOIN declinaison_telephone ON ligne_panier.declinaison_id = declinaison_telephone.id_declinaison
+    LEFT JOIN couleur ON declinaison_telephone.couleur_id = couleur.id_couleur
     WHERE ligne_panier.utilisateur_id = %s
     '''
     mycursor.execute(sql, (id_client,))
     telephone_panier = mycursor.fetchall()
+    
     prix_total = None
+    nombre_articles = 0
     if len(telephone_panier) >= 1:
         sql = '''
-        SELECT SUM(ligne_panier.quantite * telephone.prix_telephone) AS prix_total
+        SELECT SUM(ligne_panier.quantite * COALESCE(ligne_panier.prix_unitaire, telephone.prix_telephone)) AS prix_total,
+               SUM(ligne_panier.quantite) AS nombre_articles
         FROM ligne_panier
         JOIN telephone ON ligne_panier.telephone_id = telephone.id_telephone
+        LEFT JOIN declinaison_telephone ON ligne_panier.declinaison_id = declinaison_telephone.id_declinaison
         WHERE ligne_panier.utilisateur_id = %s
         '''
         mycursor.execute(sql, (id_client,))
         result = mycursor.fetchone()
         prix_total = result['prix_total']
+        nombre_articles = result['nombre_articles']
     # etape 2 : selection des adresses
 
     sql = '''SELECT id_adresse, rue, ville, code_postal FROM adresse WHERE utilisateur_id = %s'''
@@ -46,7 +56,8 @@ def client_commande_valide():
     return render_template('client/boutique/panier_validation_adresses.html'
                            , adresses=adresses
                            , telephone_panier=telephone_panier
-                           , prix_total= prix_total
+                           , prix_total=prix_total
+                           , nombre_articles=nombre_articles
                            , validation=1
                            #, id_adresse_fav=id_adresse_fav
                            )
@@ -78,14 +89,30 @@ def client_commande_add():
 
     for item in items_ligne_panier:
         sql = "DELETE FROM ligne_panier WHERE utilisateur_id = %s AND telephone_id = %s"
-        mycursor.execute(sql, (item['utilisateur_id'], item['telephone_id']))
-        sql = "SELECT prix_telephone AS prix FROM telephone WHERE id_telephone = %s"
-        mycursor.execute(sql, item['telephone_id'])
-        prix = mycursor.fetchone()
-        print(prix)
-        sql = "INSERT INTO ligne_commande(commande_id, telephone_id, prix, quantite) VALUES (%s, %s, %s, %s)"
-        tuple_insert = (commande_id['last_insert_id'], item['telephone_id'], prix['prix'], item['quantite'])
-        print(tuple_insert)
+        if item['declinaison_id'] is not None:
+            sql += " AND declinaison_id = %s"
+            mycursor.execute(sql, (item['utilisateur_id'], item['telephone_id'], item['declinaison_id']))
+        else:
+            sql += " AND declinaison_id IS NULL"
+            mycursor.execute(sql, (item['utilisateur_id'], item['telephone_id']))
+        
+        # Utiliser le prix unitaire stocké dans le panier ou prix du téléphone
+        prix_unitaire = item['prix_unitaire'] if item['prix_unitaire'] is not None else None
+        
+        if prix_unitaire is None:
+            sql = "SELECT prix_telephone AS prix FROM telephone WHERE id_telephone = %s"
+            mycursor.execute(sql, item['telephone_id'])
+            prix_data = mycursor.fetchone()
+            prix_unitaire = prix_data['prix']
+            
+        # Insérer la ligne de commande avec la déclinaison si présente
+        if item['declinaison_id'] is not None:
+            sql = "INSERT INTO ligne_commande(commande_id, telephone_id, prix, quantite, declinaison_id) VALUES (%s, %s, %s, %s, %s)"
+            tuple_insert = (commande_id['last_insert_id'], item['telephone_id'], prix_unitaire, item['quantite'], item['declinaison_id'])
+        else:
+            sql = "INSERT INTO ligne_commande(commande_id, telephone_id, prix, quantite) VALUES (%s, %s, %s, %s)"
+            tuple_insert = (commande_id['last_insert_id'], item['telephone_id'], prix_unitaire, item['quantite'])
+            
         mycursor.execute(sql, tuple_insert)
 
     get_db().commit()
@@ -116,10 +143,15 @@ def client_commande_show():
     id_commande = request.args.get('id_commande', None)
     if id_commande != None:
         print(id_commande)
-        sql = ''' selection du détails d'une commande '''
-        sql = '''SELECT ligne_commande.*, telephone.nom_telephone AS nom, (ligne_commande.prix * ligne_commande.quantite) AS prix_ligne
+        sql = '''SELECT ligne_commande.*, telephone.nom_telephone AS nom, 
+                 (ligne_commande.prix * ligne_commande.quantite) AS prix_ligne,
+                 ligne_commande.declinaison_id,
+                 declinaison_telephone.taille,
+                 couleur.libelle_couleur
                  FROM ligne_commande
                  JOIN telephone ON ligne_commande.telephone_id = telephone.id_telephone
+                 LEFT JOIN declinaison_telephone ON ligne_commande.declinaison_id = declinaison_telephone.id_declinaison
+                 LEFT JOIN couleur ON declinaison_telephone.couleur_id = couleur.id_couleur
                  WHERE ligne_commande.commande_id = %s'''
         mycursor.execute(sql, id_commande)
         telephones_commande = mycursor.fetchall()

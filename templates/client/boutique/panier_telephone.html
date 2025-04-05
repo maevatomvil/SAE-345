@@ -44,7 +44,7 @@
                                         <button class="btn  btn-success"  id="button-addon1">
                                             <i class="fas fa-shopping-cart">Ajouter</i>
                                         </button>
-                                        <input type="number" id="input-{{ telephone.id_telephone }}" step="1" min="0" max="{{ telephone.stock }}" class="form-control" value="1" name="quantite"  aria-describedby="button-addon1">
+                                        <input type="number" id="input-{{ telephone.id_telephone }}" step="1" min="0" max="{{ telephone.stock_total }}" class="form-control" value="1" name="quantite"  aria-describedby="button-addon1">
                                     </div>
                                 </form>
                                 {# #}                                    {% endif %}
@@ -62,13 +62,19 @@
                     </div>
                     <div class="card-footer">
                         {% if telephone.stock is defined and telephone.stock != None %}
-                            {% if telephone.stock > 0 %}
-                                <small class="text-muted">Stock restant : {{ telephone.stock }}</small>
+                            {% if telephone.stock_total > 0 %}
+                                <small class="text-muted">Stock total : {{ telephone.stock_total }}</small>
+                                {% if telephone.nombre_declinaisons > 0 %}
+                                    <small class="text-muted">({{ telephone.nombre_declinaisons }} d.)</small>
+                                    {% if telephone.details_stock %}
+                                        <br>
+                                        <small class="text-muted">Détails : {{ telephone.details_stock }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <small class="text-muted">(1 d.)</small>
+                                {% endif %}
                             {% else %}
                                 <small class="text-muted">Téléphone momentanément indisponible</small>
-                            {% endif %}
-                            {% if telephone.nb_declinaison is defined and telephone.nb_declinaison != None %}
-                                ({{ telephone.nb_declinaison }} d.)
                             {% endif %}
                             <br>
                         {% endif %}
