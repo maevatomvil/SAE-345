@@ -33,10 +33,20 @@ def show_telephone():
         telephone.stock, 
         telephone.image, 
         type_telephone.libelle_type_telephone as libelle,
-        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = telephone.id_telephone AND commentaire.valider = 0) AS nb_commentaires_nouveaux
-        FROM telephone
+        (SELECT COUNT(*) FROM commentaire WHERE telephone_id = telephone.id_telephone AND commentaire.valider = 0) AS nb_commentaires_nouveaux,
+        COALESCE((SELECT CASE 
+            WHEN COUNT(*) = 0 THEN 1 
+            ELSE COUNT(*) 
+        END 
+        FROM declinaison_telephone 
+        WHERE telephone_id = telephone.id_telephone), 0) AS nb_declinaisons,
+        COALESCE((SELECT COUNT(*) 
+        FROM declinaison_telephone 
+        WHERE telephone_id = telephone.id_telephone 
+        AND stock = 0), 0) AS nb_declinaisons_rupture
+    FROM telephone
     LEFT JOIN type_telephone ON telephone.type_telephone_id = type_telephone.id_type_telephone
-        '''
+    '''
 
     params = []
     if filter_stock == 'low':
@@ -184,7 +194,7 @@ def edit_telephone():
     id_telephone = request.args.get('id_telephone')
     mycursor = get_db().cursor()
 
-    # Updated SQL to fetch all new columns
+    # Fetch telephone info
     sql = '''
     SELECT 
         telephone.id_telephone, 
@@ -196,19 +206,63 @@ def edit_telephone():
         telephone.poids,
         telephone.taille,
         telephone.fournisseur,
-        telephone.marque,
-        type_telephone.libelle_type_telephone as libelle
+        telephone.marque
     FROM telephone
-    LEFT JOIN type_telephone ON telephone.type_telephone_id = type_telephone.id_type_telephone
     WHERE telephone.id_telephone = %s
     '''
     mycursor.execute(sql, (id_telephone,))
     telephone = mycursor.fetchone()
 
+    # Fetch declinaisons
+    sql_declinaisons = '''
+    SELECT 
+        declinaison_telephone.id_declinaison,
+        declinaison_telephone.taille,
+        declinaison_telephone.stock,
+        couleur.libelle_couleur as couleur,
+        couleur.id_couleur as couleur_id
+    FROM declinaison_telephone
+    LEFT JOIN couleur ON declinaison_telephone.couleur_id = couleur.id_couleur
+    WHERE telephone_id = %s
+    '''
+    mycursor.execute(sql_declinaisons, (id_telephone,))
+    declinaisons = mycursor.fetchall()
+
+    # If no declinaisons exist, create a default one
+    if not declinaisons:
+        # Get default color (or create it if it doesn't exist)
+        sql_default_color = '''
+        SELECT id_couleur FROM couleur WHERE libelle_couleur = 'couleur unique'
+        '''
+        mycursor.execute(sql_default_color)
+        default_color = mycursor.fetchone()
+
+        if not default_color:
+            sql_insert_color = '''
+            INSERT INTO couleur (libelle_couleur) VALUES ('couleur unique')
+            '''
+            mycursor.execute(sql_insert_color)
+            get_db().commit()
+            default_color_id = mycursor.lastrowid
+        else:
+            default_color_id = default_color['id_couleur']
+
+        # Create default declinaison
+        sql_insert_declinaison = '''
+        INSERT INTO declinaison_telephone (telephone_id, taille, stock, couleur_id)
+        VALUES (%s, 'taille unique', %s, %s)
+        '''
+        mycursor.execute(sql_insert_declinaison, (id_telephone, telephone['stock'], default_color_id))
+        get_db().commit()
+
+        # Fetch the newly created declinaison
+        mycursor.execute(sql_declinaisons, (id_telephone,))
+        declinaisons = mycursor.fetchall()
+
     # Fetch types of telephones
     sql = '''
-    SELECT id_type_telephone, libelle_type_telephone as libelle
-    FROM type_telephone
+    SELECT id_type_telephone, libelle_type_telephone as libelle 
+    FROM type_telephone 
     ORDER BY libelle_type_telephone
     '''
     mycursor.execute(sql)
@@ -216,7 +270,8 @@ def edit_telephone():
 
     return render_template('admin/telephone/edit_telephone.html',
                            telephone=telephone,
-                           types_telephone=types_telephone)
+                           types_telephone=types_telephone,
+                           declinaisons=declinaisons)
 
 
 @admin_telephone.route('/admin/telephone/edit', methods=['POST'])
@@ -313,3 +368,214 @@ def admin_avis_delete():
     userId = request.form.get('idUser', None)
 
     return admin_avis(telephone_id)
+
+
+@admin_telephone.route('/admin/telephone/add_declinaison', methods=['GET'])
+def add_declinaison():
+    id_telephone = request.args.get('id_telephone')
+    mycursor = get_db().cursor()
+
+    # Fetch telephone info
+    sql = '''
+    SELECT 
+        telephone.id_telephone,
+        telephone.nom_telephone as nom,
+        telephone.image
+    FROM telephone
+    WHERE telephone.id_telephone = %s
+    '''
+    mycursor.execute(sql, (id_telephone,))
+    telephone = mycursor.fetchone()
+
+    # Check if there's already a unique size
+    sql_taille_unique = '''
+    SELECT COUNT(*) as count
+    FROM declinaison_telephone
+    WHERE telephone_id = %s AND taille = 'taille unique'
+    '''
+    mycursor.execute(sql_taille_unique, (id_telephone,))
+    result = mycursor.fetchone()
+    taille_unique = result['count'] > 0 if result else False
+
+    # Fetch available colors
+    sql = '''
+    SELECT id_couleur, libelle_couleur
+    FROM couleur
+    ORDER BY libelle_couleur
+    '''
+    mycursor.execute(sql)
+    couleurs = mycursor.fetchall()
+
+    return render_template('admin/telephone/add_declinaison_telephone.html',
+                         telephone=telephone,
+                         couleurs=couleurs,
+                         taille_unique=taille_unique)
+
+@admin_telephone.route('/admin/telephone/add_declinaison', methods=['POST'])
+def valid_add_declinaison():
+    mycursor = get_db().cursor()
+    id_telephone = request.form.get('id_telephone')
+    stock = request.form.get('stock')
+    couleur_id = request.form.get('couleur_id')
+    taille = request.form.get('taille')
+
+    # Insert new declinaison
+    sql = '''
+    INSERT INTO declinaison_telephone(telephone_id, taille, stock, couleur_id)
+    VALUES (%s, %s, %s, %s)
+    '''
+    mycursor.execute(sql, (id_telephone, taille, stock, couleur_id))
+
+    # Update total stock in telephone table
+    sql_update_stock = '''
+    UPDATE telephone 
+    SET stock = (
+        SELECT COALESCE(SUM(stock), 0)
+        FROM declinaison_telephone
+        WHERE telephone_id = %s
+    )
+    WHERE id_telephone = %s
+    '''
+    mycursor.execute(sql_update_stock, (id_telephone, id_telephone))
+    
+    get_db().commit()
+
+    flash(u'Déclinaison ajoutée avec succès', 'alert-success')
+    return redirect(f'/admin/telephone/edit?id_telephone={id_telephone}')
+
+@admin_telephone.route('/admin/telephone/edit_declinaison', methods=['GET'])
+def edit_declinaison():
+    id_declinaison = request.args.get('id_declinaison')
+    mycursor = get_db().cursor()
+
+    # Fetch declinaison info
+    sql = '''
+    SELECT 
+        declinaison_telephone.*,
+        telephone.nom_telephone as nom,
+        telephone.image,
+        couleur.id_couleur,
+        couleur.libelle_couleur
+    FROM declinaison_telephone
+    JOIN telephone ON declinaison_telephone.telephone_id = telephone.id_telephone
+    LEFT JOIN couleur ON declinaison_telephone.couleur_id = couleur.id_couleur
+    WHERE declinaison_telephone.id_declinaison = %s
+    '''
+    mycursor.execute(sql, (id_declinaison,))
+    declinaison = mycursor.fetchone()
+
+    if not declinaison:
+        flash(u'Déclinaison non trouvée', 'alert-warning')
+        return redirect('/admin/telephone/show')
+
+    # Fetch available colors
+    sql = '''
+    SELECT id_couleur, libelle_couleur
+    FROM couleur
+    ORDER BY libelle_couleur
+    '''
+    mycursor.execute(sql)
+    couleurs = mycursor.fetchall()
+
+    telephone = {
+        'id_telephone': declinaison['telephone_id'],
+        'nom': declinaison['nom'],
+        'image': declinaison['image']
+    }
+
+    return render_template('admin/telephone/edit_declinaison_telephone.html',
+                         telephone=telephone,
+                         declinaison=declinaison,
+                         couleurs=couleurs)
+
+@admin_telephone.route('/admin/telephone/edit_declinaison', methods=['POST'])
+def valid_edit_declinaison():
+    mycursor = get_db().cursor()
+    id_telephone = request.form.get('id_telephone')
+    id_declinaison = request.form.get('id_declinaison')
+    stock = request.form.get('stock')
+    couleur_id = request.form.get('couleur_id')
+    taille = request.form.get('taille')
+
+    # Update declinaison
+    sql = '''
+    UPDATE declinaison_telephone
+    SET taille = %s, stock = %s, couleur_id = %s
+    WHERE id_declinaison = %s
+    '''
+    mycursor.execute(sql, (taille, stock, couleur_id, id_declinaison))
+
+    # Update total stock in telephone table
+    sql_update_stock = '''
+    UPDATE telephone 
+    SET stock = (
+        SELECT COALESCE(SUM(stock), 0)
+        FROM declinaison_telephone
+        WHERE telephone_id = %s
+    )
+    WHERE id_telephone = %s
+    '''
+    mycursor.execute(sql_update_stock, (id_telephone, id_telephone))
+    
+    get_db().commit()
+
+    flash(u'Déclinaison modifiée avec succès', 'alert-success')
+    return redirect(f'/admin/telephone/edit?id_telephone={id_telephone}')
+
+@admin_telephone.route('/admin/telephone/delete_declinaison', methods=['GET'])
+def delete_declinaison():
+    id_declinaison = request.args.get('id_declinaison')
+    mycursor = get_db().cursor()
+
+    # Get telephone_id before deleting the declinaison
+    sql = '''
+    SELECT telephone_id 
+    FROM declinaison_telephone 
+    WHERE id_declinaison = %s
+    '''
+    mycursor.execute(sql, (id_declinaison,))
+    result = mycursor.fetchone()
+    
+    if not result:
+        flash(u'Déclinaison non trouvée', 'alert-warning')
+        return redirect('/admin/telephone/show')
+    
+    id_telephone = result['telephone_id']
+
+    # Check if this declinaison is in any order
+    sql_check_commande = '''
+    SELECT COUNT(*) as count
+    FROM ligne_commande lc
+    JOIN declinaison_telephone dt ON lc.declinaison_id = dt.id_declinaison
+    WHERE dt.id_declinaison = %s
+    '''
+    mycursor.execute(sql_check_commande, (id_declinaison,))
+    result = mycursor.fetchone()
+    
+    if result and result['count'] > 0:
+        flash(u'Impossible de supprimer cette déclinaison : elle est présente dans une commande', 'alert-warning')
+        return redirect(f'/admin/telephone/edit?id_telephone={id_telephone}')
+
+    # Delete the declinaison
+    sql_delete = '''
+    DELETE FROM declinaison_telephone 
+    WHERE id_declinaison = %s
+    '''
+    mycursor.execute(sql_delete, (id_declinaison,))
+
+    # Update total stock in telephone table
+    sql_update_stock = '''
+    UPDATE telephone 
+    SET stock = (
+        SELECT COALESCE(SUM(stock), 0)
+        FROM declinaison_telephone
+        WHERE telephone_id = %s
+    )
+    WHERE id_telephone = %s
+    '''
+    mycursor.execute(sql_update_stock, (id_telephone, id_telephone))
+    
+    get_db().commit()
+
+    flash(u'Déclinaison supprimée avec succès', 'alert-success')
+    return redirect(f'/admin/telephone/edit?id_telephone={id_telephone}')

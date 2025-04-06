@@ -29,7 +29,7 @@
     <tbody>
     {% if telephones | length >= 1 %}
         {% for ligne in telephones %}
-           <tr>
+           <tr {% if ligne.stock == 0 %}class="table-warning"{% endif %}>
                   <td>{{ ligne.nom }}</td>
                   <td>{{ ligne.id_telephone }}</td>
                   <td><span style="color: red">{{ ligne.libelle }}</span> ({{ ligne.type_telephone_id }})</td>
@@ -43,11 +43,11 @@
                      {% if ligne.stock != None  %}
                         {% if ligne.stock > 0 %}
                             <strong style="color: green">{{ ligne.stock }}</strong>
-                            {% if ligne.min_stock is defined  and ligne.min_stock <= 0 %}
-                                <span style="color: #fd7e14">( déclinaison(s) en rupture)</span>
+                            {% if ligne.nb_declinaisons_rupture > 0 %}
+                                <span style="color: #fd7e14">( {{ ligne.nb_declinaisons_rupture }} déclinaison(s) en rupture)</span>
                             {% endif %}
                         {% else %}
-                            <strong class="text-muted">telephone momentanément indisponible</strong>
+                            <strong class="text-danger">⚠️ Article à réapprovisionner</strong>
                         {% endif %}
                      {% else %}
                              <strong class="text-muted">déclinaison ND</strong>
@@ -82,7 +82,7 @@
                         {% endif %}
                   </td>
                   <td>
-                      <a  class="btn btn-outline-danger" href="/admin/telephone/delete?id_telephone={{ ligne.id_telephone }}" onclick="return confirm('Voulez-vous vraiment supprimer ce modèle de téléphone ?')" >Supprimer</a>
+                      <a  class="btn btn-outline-danger" href="/admin/telephone/delete?id_telephone={{ ligne.id_telephone }}" >Supprimer</a>
                       <a  class="btn btn-outline-warning" href="/admin/telephone/edit?id_telephone={{ ligne.id_telephone }}">Editer</a>
                       <a  class="btn btn-outline-warning" href="/admin/telephone/commentaires?id_telephone={{ ligne.id_telephone }}">Commentaires</a>
                   </td>
