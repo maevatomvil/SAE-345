@@ -17,11 +17,11 @@ def client_coordonnee_show():
     mycursor.execute(sql, id_client)
     utilisateur=mycursor.fetchone()
 
-    sql = '''SELECT adresse.rue, adresse.ville, adresse.code_postal, COUNT(commande.adresse_livraison_id) as nbr_commandes
+    sql = '''SELECT adresse.nom, adresse.rue, adresse.ville, adresse.code_postal, COUNT(commande.adresse_livraison_id) as nbr_commandes
              FROM adresse 
              JOIN commande ON adresse.id_adresse = commande.adresse_livraison_id
              WHERE adresse.utilisateur_id = %s
-             GROUP BY adresse.rue, adresse.ville, adresse.code_postal'''
+             GROUP BY adresse.nom, adresse.rue, adresse.ville, adresse.code_postal'''
     mycursor.execute(sql, id_client)
     adresses=mycursor.fetchall()
 
@@ -36,9 +36,12 @@ def client_coordonnee_show():
 def client_coordonnee_edit():
     mycursor = get_db().cursor()
     id_client = session['id_user']
+    sql = "SELECT login, nom, email FROM utilisateur WHERE id_utilisateur = %s"
+    mycursor.execute(sql, id_client)
+    utilisateur=mycursor.fetchone()
 
     return render_template('client/coordonnee/edit_coordonnee.html'
-                           #,utilisateur=utilisateur
+                           ,utilisateur=utilisateur
                            )
 
 @client_coordonnee.route('/client/coordonnee/edit', methods=['POST'])
@@ -49,15 +52,25 @@ def client_coordonnee_edit_valide():
     login = request.form.get('login')
     email = request.form.get('email')
 
-    utilisateur = None
+    sql = "SELECT email, login FROM utilisateur WHERE email=%s OR login=%s"
+    mycursor.execute(sql, (email, login))
+
+    utilisateur=mycursor.fetchall()
     if utilisateur:
-        flash(u'votre cet Email ou ce Login existe déjà pour un autre utilisateur', 'alert-warning')
+        flash(u'cet Email ou ce Login existe déjà pour un autre utilisateur', 'alert-warning')
+        sql = "SELECT login, nom, email FROM utilisateur WHERE id_utilisateur = %s"
+        mycursor.execute(sql, id_client)
+        utilisateur=mycursor.fetchone()
         return render_template('client/coordonnee/edit_coordonnee.html'
-                               #, user=user
+                               , utilisateur=utilisateur
                                )
+    
+    sql = "UPDATE utilisateur SET login = %s, email = %s, nom = %s WHERE id_utilisateur = %s"
+    mycursor.execute(sql, (login, email, nom, id_client))
 
 
     get_db().commit()
+    flash(u'profil modifié avec succès', 'alert-success')
     return redirect('/client/coordonnee/show')
 
 
@@ -73,9 +86,12 @@ def client_coordonnee_delete_adresse():
 def client_coordonnee_add_adresse():
     mycursor = get_db().cursor()
     id_client = session['id_user']
+    sql = "SELECT login, nom, email FROM utilisateur WHERE id_utilisateur = %s"
+    mycursor.execute(sql, id_client)
+    utilisateur=mycursor.fetchone()
 
     return render_template('client/coordonnee/add_adresse.html'
-                           #,utilisateur=utilisateur
+                           ,utilisateur=utilisateur
                            )
 
 @client_coordonnee.route('/client/coordonnee/add_adresse',methods=['POST'])

@@ -76,6 +76,7 @@ CREATE TABLE ligne_panier (
 CREATE TABLE adresse (
     id_adresse INT AUTO_INCREMENT,
     utilisateur_id INT,
+    nom varchar(255),
     rue VARCHAR(255),
     ville VARCHAR(100),
     code_postal VARCHAR(20),
@@ -216,10 +217,10 @@ INSERT INTO ligne_panier (utilisateur_id, telephone_id, date_ajout, quantite) VA
     (2, 13, '2024-02-23 11:40:00', 1),
     (2, 16, '2024-02-23 11:45:00', 1);
 
-INSERT INTO adresse (utilisateur_id, rue, ville, code_postal, pays, type_adresse) VALUES
-    (1, '10 Rue de la Paix', 'Paris', '75001', 'France', 'livraison'),
-    (2, '25 Avenue des Champs', 'Lyon', '69002', 'France', 'Facturation'),
-    (3, '5 Boulevard Haussmann', 'Marseille', '13008', 'France', 'livraison');
+INSERT INTO adresse (utilisateur_id, nom, rue, ville, code_postal, pays, type_adresse) VALUES
+    (1,'admin', '10 Rue de la Paix', 'Paris', '75001', 'France', 'livraison'),
+    (2,'client', '25 Avenue des Champs', 'Lyon', '69002', 'France', 'Facturation'),
+    (3,'client2', '5 Boulevard Haussmann', 'Marseille', '13008', 'France', 'livraison');
 
 INSERT INTO commande (date_achat, adresse_facturation_id, adresse_livraison_id, utilisateur_id, etat_id) VALUES
     ('2025-02-01 14:30:00', 1, 1, 2, 1),
