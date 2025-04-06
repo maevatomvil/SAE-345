@@ -10,7 +10,6 @@ DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS declinaison_telephone;
 DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS utilisateur;
-DROP TABLE IF EXISTS declinaison_telephone;
 DROP TABLE IF EXISTS telephone;
 DROP TABLE IF EXISTS type_telephone;
 DROP TABLE IF EXISTS couleur;
