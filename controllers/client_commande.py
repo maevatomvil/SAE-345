@@ -115,6 +115,12 @@ def client_commande_add():
             
         mycursor.execute(sql, tuple_insert)
 
+    sql = "UPDATE adresse SET favori = 0 WHERE utilisateur_id = %s"
+    mycursor.execute(sql, id_client)
+
+    sql = "UPDATE adresse SET favori = 1 WHERE id_adresse = %s"
+    mycursor.execute(sql, id_adresse_livraison)
+
     get_db().commit()
     flash(u'Commande ajoutée','alert-success')
     return redirect('/client/telephone/show')

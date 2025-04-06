@@ -42,13 +42,13 @@
                             {% if adresse.favori is defined and adresse.favori==1 %} style="color: blue; font-weight: bolder;"{% endif %}
                     >
 
-                        <td>{{ adresse.nom }}
+                        <td style="color:inherit">{{ adresse.nom }}
                             {% if adresse.favori is defined and adresse.favori==1 %}💛{% endif %}
                         </td>
-                        <td>{{ adresse.rue }}</td>
-                        <td>{{ adresse.code_postal }}</td>
-                        <td>{{ adresse.ville }}</td>
-                        <td> {% if adresse.nbr_commandes is defined %}{{ adresse.nbr_commandes }} {% endif %} </td>
+                        <td style="color:inherit">{{ adresse.rue }}</td>
+                        <td style="color:inherit">{{ adresse.code_postal }}</td>
+                        <td style="color:inherit">{{ adresse.ville }}</td>
+                        <td style="color:inherit"> {% if adresse.nbr_commandes is defined %}{{ adresse.nbr_commandes }} {% endif %} </td>
                         <td>
                             {% if adresse.valide is defined and adresse.valide==0 %}
                                 <span style="color: darkorange">*</span>

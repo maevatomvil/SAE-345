@@ -4,8 +4,7 @@
 <div class="m-auto p-3 border" style="width: 500px">
     <form action="/client/coordonnee/edit_adresse" method="post">
         <input type="hidden" name="id_adresse" value="{{ adresse.id_adresse }}"></td>
-
-        <table class="table" >
+        <table class="table">
             <tr>
                 <td>Utilisateur connecté :</td>
                 <td> nom : {{ utilisateur.nom }} , login : {{ utilisateur.login }}</td>
@@ -25,6 +24,10 @@
             <tr>
                 <td>Ville :</td>
                 <td><input type="text" name="ville" required  maxlength="50" value="{{ adresse.ville }}"></td>
+            </tr>
+            <tr>
+                <td>Pays :</td>
+                <td><input type="text" name="pays" required  maxlength="50" class="form-control" value="{{ adresse.pays }}" ></td>
             </tr>
         </table>
         <button class="btn btn-primary" type="submit">Valider</button>

@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS ligne_commande;
 DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS adresse;
 DROP TABLE IF EXISTS ligne_panier;
+DROP TABLE IF EXISTS declinaison_telephone;
 DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS telephone;
@@ -46,6 +47,18 @@ CREATE TABLE telephone (
     FOREIGN KEY (type_telephone_id) REFERENCES type_telephone(id_type_telephone)
 );
 
+CREATE TABLE declinaison_telephone (
+    id_declinaison INT AUTO_INCREMENT,
+    telephone_id INT,
+    taille VARCHAR(50),
+    stock INT,
+    prix DECIMAL(15,2),
+    couleur_id INT,
+    PRIMARY KEY(id_declinaison),
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur)
+);
+
 CREATE TABLE utilisateur (
     id_utilisateur INT AUTO_INCREMENT,
     login VARCHAR(50),
@@ -68,9 +81,12 @@ CREATE TABLE ligne_panier (
     telephone_id INT,
     date_ajout DATETIME,
     quantite INT,
+    declinaison_id INT,
+    prix_unitaire DECIMAL(15,2),
     PRIMARY KEY (utilisateur_id, telephone_id, date_ajout),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
-    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (declinaison_id) REFERENCES declinaison_telephone(id_declinaison)
 );
 
 CREATE TABLE adresse (
@@ -81,7 +97,8 @@ CREATE TABLE adresse (
     ville VARCHAR(100),
     code_postal VARCHAR(20),
     pays VARCHAR(100),
-    type_adresse VARCHAR(50),
+    favori TINYINT(1),
+    valide TINYINT(1),
     PRIMARY KEY (id_adresse),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur)
 );
@@ -195,6 +212,46 @@ INSERT INTO telephone (nom_telephone, poids, taille, couleur_id, prix_telephone,
     ('Alcatel XL585 Solo', 105, 2.6, 5, 49.99, 'Alcatel', 'Alcatel', 4, 30, 'Téléphone avec grandes touches pour une utilisation facile.', 'alcatelXL585solo.jpg'),
     ('Essentielb Tribu Duo-R V3', 120, 2.4, 6, 39.99, 'Essentielb', 'Essentielb', 4, 18, 'Téléphone simple et efficace avec double SIM.', 'essentielbtribuduo-Rv3.jpg');
 
+INSERT INTO declinaison_telephone (telephone_id, taille, stock, prix, couleur_id) VALUES
+    (1, '128Go', 15, 909.00, 10),
+    (1, '256Go', 20, 999.00, 10),
+    (1, '128Go', 10, 909.00, 1),
+    (1, '256Go', 12, 999.00, 1),
+    (2, '128Go', 8, 1199.00, 9),
+    (2, '256Go', 10, 1299.00, 9),
+    (2, '512Go', 5, 1499.00, 9),
+    (2, '128Go', 10, 1199.00, 1),
+    (2, '256Go', 12, 1299.00, 1),
+    (5, '64Go', 5, 709.00, 1),
+    (5, '128Go', 8, 809.00, 1),
+    (5, '64Go', 6, 709.00, 7),
+    (5, '128Go', 7, 809.00, 7),
+    (6, '128Go', 15, 1099.00, 4),
+    (6, '256Go', 18, 1199.00, 4),
+    (6, '128Go', 12, 1099.00, 1),
+    (6, '256Go', 15, 1199.00, 1),
+    (7, '128Go', 8, 1399.00, 11),
+    (7, '256Go', 10, 1499.00, 11),
+    (7, '512Go', 5, 1699.00, 11),
+    (7, '1To', 3, 1899.00, 11),
+    (8, '128Go', 5, 1599.00, 5),
+    (8, '256Go', 7, 1699.00, 5),
+    (8, '512Go', 4, 1899.00, 5),
+    (8, '1To', 3, 2099.00, 5),
+    (11, '128Go', 20, 999.00, 7),
+    (11, '256Go', 25, 1099.00, 7),
+    (11, '128Go', 18, 999.00, 10),
+    (11, '256Go', 22, 1099.00, 10),
+    (12, '128Go', 10, 1349.00, 1),
+    (12, '256Go', 15, 1449.00, 1),
+    (12, '512Go', 8, 1649.00, 1),
+    (12, '128Go', 12, 1349.00, 8),
+    (12, '256Go', 14, 1449.00, 8),
+    (13, '128Go', 12, 1499.00, 6),
+    (13, '256Go', 15, 1599.00, 6),
+    (13, '128Go', 10, 1499.00, 2),
+    (13, '256Go', 13, 1599.00, 2);
+
 INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
     (1,'admin','admin@admin.fr',
     'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
@@ -217,10 +274,10 @@ INSERT INTO ligne_panier (utilisateur_id, telephone_id, date_ajout, quantite) VA
     (2, 13, '2024-02-23 11:40:00', 1),
     (2, 16, '2024-02-23 11:45:00', 1);
 
-INSERT INTO adresse (utilisateur_id, nom, rue, ville, code_postal, pays, type_adresse) VALUES
-    (1,'admin', '10 Rue de la Paix', 'Paris', '75001', 'France', 'livraison'),
-    (2,'client', '25 Avenue des Champs', 'Lyon', '69002', 'France', 'Facturation'),
-    (3,'client2', '5 Boulevard Haussmann', 'Marseille', '13008', 'France', 'livraison');
+INSERT INTO adresse (utilisateur_id, nom, rue, ville, code_postal, pays, valide, favori) VALUES
+    (1,'admin', '10 Rue de la Paix', 'Paris', '75001', 'France', 1, 1),
+    (2,'client', '25 Avenue des Champs', 'Lyon', '69002', 'France', 1, 1),
+    (3,'client2', '5 Boulevard Haussmann', 'Marseille', '13008', 'France', 1, 1);
 
 INSERT INTO commande (date_achat, adresse_facturation_id, adresse_livraison_id, utilisateur_id, etat_id) VALUES
     ('2025-02-01 14:30:00', 1, 1, 2, 1),

@@ -3,6 +3,7 @@
 
 <div class="m-auto p-3 border col-lg-6">
     <form action="/client/coordonnee/add_adresse" method="post">
+        
         <table class="table w-auto" >
             <tr>
                 <td>Utilisateur connecté :</td>
@@ -23,6 +24,10 @@
             <tr>
                 <td>Ville :</td>
                 <td><input type="text" name="ville" required  maxlength="50" class="form-control" value="{{ ville }}" ></td>
+            </tr>
+            <tr>
+                <td>Pays :</td>
+                <td><input type="text" name="pays" required  maxlength="50" class="form-control" value="{{ pays }}" ></td>
             </tr>
         </table>
         <button class="btn btn-primary" type="submit">Valider</button>
