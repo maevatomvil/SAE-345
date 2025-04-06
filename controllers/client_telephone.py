@@ -56,9 +56,7 @@ def client_telephone_show():
               telephone.marque AS marque,
               telephone.stock AS stock,
               telephone.image AS image,
-              # c'est le nombre de déclinaisons pour un téléphone (1)
               (SELECT COUNT(*) FROM declinaison_telephone WHERE telephone_id = telephone.id_telephone) AS nombre_declinaisons,
-              # (2)  la somme des stock de tous les declinaisons , Si aucune déclinaison n'existe sum retournera null ce qui retourne somme totale directement
               (SELECT COALESCE(SUM(stock), telephone.stock) 
                FROM declinaison_telephone 
                WHERE telephone_id = telephone.id_telephone) AS stock_total,

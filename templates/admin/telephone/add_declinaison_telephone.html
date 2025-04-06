@@ -1,53 +1,57 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>ajouter un casque</title>
+    <title>Ajouter une déclinaison</title>
 {% endblock %}
 
 {% block body %}
-    <h2>ajouter une déclinaison d'un telephone</h2>
+<div class="container">
+    <h2>ajouter une déclinaison d'un article</h2>
+
     <div class="row mt-5">
-    {% if telephone.image is defined and telephone.image is not none %}
-        <img class="card-img-top rounded mx-4 d-block"  style="width:200px; height:200px; border: 1px solid black; padding: 25px;" id="output" src="{{ url_for('static', filename = 'images/')}}{{ telephone.image }}" alt="">
-    {% endif %}
-        <div class="w-25">
-            <form class="w-190" method="post" action="/admin/declinaison_telephone/add">
-                <input id="id_telephone" type="hidden" name="id_telephone" value="{{ telephone.id_telephone }}">
-                <label for="stock">stock :
-                    <input name="stock" id="stock" type="number" class="form-control" required>
-                </label>
-                {% if  d_couleur_uniq is defined and  d_couleur_uniq==1 %}
-                    <div>!</div><div><strong>Une couleur unique est définie </strong></div>
-                    <input type="hidden" name="couleur" value="1">
-                {% else %}
-                <label for="couleur">Couleur :
-                    <select name="couleur" required class="form-select">
+        {% if telephone.image is not none %}
+            <div class="col-md-4">
+                <img class="img-fluid" style="max-width: 300px; border: 1px solid #ddd; padding: 10px;" src="{{ url_for('static', filename = 'images/' + telephone.image) }}" alt="image de {{ telephone.nom }}">
+            </div>
+        {% endif %}
+
+        <div class="col-md-6">
+            <form method="post" action="/admin/telephone/add_declinaison">
+                <input type="hidden" name="id_telephone" value="{{ telephone.id_telephone }}">
+                
+                <div class="mb-3">
+                    <label for="stockage" class="form-label">Stockage :</label>
+                    <select name="taille" class="form-select" required>
+                        <option value="">Sélectionner un stockage</option>
+                        <option value="64Go">64 Go</option>
+                        <option value="128Go">128 Go</option>
+                        <option value="256Go">256 Go</option>
+                        <option value="512Go">512 Go</option>
+                        <option value="1To">1 To</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="couleur" class="form-label">Couleur :</label>
+                    <select name="couleur_id" class="form-select" required>
                         <option value="">Sélectionner une couleur</option>
                         {% for couleur in couleurs %}
-                             <option value="{{ couleur.id_couleur }}"> {{ couleur.libelle }}</option>
+                            <option value="{{ couleur.id_couleur }}">{{ couleur.libelle_couleur }}</option>
                         {% endfor %}
                     </select>
-                </label>
-                {% endif %}
-                {% if  d_taille_uniq is defined and  d_taille_uniq==1 %}
-                    <div>!</div><div><strong>Une taille unique est définie </strong></div>
-                    <input type="hidden" name="taille" value="1">
-                {% else %}
-                <label for="taille">Taille :
-                    <select id="taille" name="taille" required class="form-select">
-                        <option value="">Sélectionner une taille</option>
-                        {% for taille in tailles %}
-                            <option value="{{ taille.id_taille }}"> {{ taille.libelle }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                {% endif %}
-                <label for="submit">
-                    <input name="submit" type="submit" value="Ajouter" class="btn btn-primary mt-2">
-                </label>
+                </div>
 
+                <div class="mb-3">
+                    <label for="stock" class="form-label">Stock :</label>
+                    <input type="number" name="stock" class="form-control" min="0" required>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                    <a href="/admin/telephone/edit?id_telephone={{ telephone.id_telephone }}" class="btn btn-secondary">annuler</a>
+                </div>
             </form>
-         <a href="/admin/telephone/edit?id_telephone={{ telephone.id_telephone }}"><button class="btn btn-secondary mt-2">annuler</button></a>
         </div>
     </div>
+</div>
 {% endblock %}

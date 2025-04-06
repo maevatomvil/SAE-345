@@ -43,9 +43,11 @@ types_telephone : tableau de dictionnaires
                 <label for="marque">Marque :
                     <input name="marque" type="text" value="{{ telephone.marque if telephone.marque is not none else '' }}" class="form-control" required>
                 </label>
+                {% if not declinaisons %}
                 <label for="stock">Stock :
                     <input name="stock" type="number" min="0" value="{{ telephone.stock }}" class="form-control" required>
                 </label>
+                {% endif %}
                 <label for="image">Image :
                     <input name="image" type="file" onchange="loadFile(event)" class="form-control">
                 </label>
@@ -67,5 +69,34 @@ types_telephone : tableau de dictionnaires
                 <a class="btn btn-secondary mt-2" href="/admin/telephone/show" role="button">Retour</a>
             </form>
         </div>
+    </div>
+
+    <div class="mt-5">
+        <h3>déclinaison en fonction de la taille/couleur (variante)</h3>
+        <a href="/admin/telephone/add_declinaison?id_telephone={{ telephone.id_telephone }}" class="btn btn-primary mb-3">Ajouter une déclinaison (variante)</a>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>taille</th>
+                    <th>couleur</th>
+                    <th>stock</th>
+                    <th>opérations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for declinaison in declinaisons %}
+                <tr>
+                    <td>{{ declinaison.taille }}</td>
+                    <td>{{ declinaison.couleur }}</td>
+                    <td>{{ declinaison.stock }}</td>
+                    <td>
+                        <a href="/admin/telephone/edit_declinaison?id_declinaison={{ declinaison.id_declinaison }}" class="btn btn-primary">editer</a>
+                        <a href="/admin/telephone/delete_declinaison?id_declinaison={{ declinaison.id_declinaison }}" class="btn btn-primary" >supprimer</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}
