@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS telephone;
 DROP TABLE IF EXISTS type_telephone;
 DROP TABLE IF EXISTS couleur;
+DROP TABLE IF EXISTS declinaison_telephone;
 
 
 CREATE TABLE couleur (
@@ -44,6 +45,18 @@ CREATE TABLE telephone (
     PRIMARY KEY(id_telephone),
     FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur),
     FOREIGN KEY (type_telephone_id) REFERENCES type_telephone(id_type_telephone)
+);
+
+CREATE TABLE declinaison_telephone (
+    id_declinaison INT AUTO_INCREMENT,
+    telephone_id INT,
+    taille VARCHAR(10),
+    couleur_id INT,
+    stock INT,
+    prix DECIMAL(15,2),
+    PRIMARY KEY(id_declinaison),
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur)
 );
 
 CREATE TABLE utilisateur (
