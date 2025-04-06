@@ -46,10 +46,16 @@ def admin_commande_show():
         sql_telephones = '''SELECT ligne_commande.*, telephone.nom_telephone AS nom, 
                  (ligne_commande.prix * ligne_commande.quantite) AS prix_ligne,
                  commande.id_commande AS commande_id,
-                 commande.etat_id AS etat_id  
+                 ###### ajouté pour la taille et la couleur 1
+                 commande.etat_id AS etat_id,
+                 declinaison_telephone.taille,
+                 couleur.libelle_couleur  
                  FROM ligne_commande
                  JOIN telephone ON ligne_commande.telephone_id = telephone.id_telephone
                  JOIN commande ON ligne_commande.commande_id = commande.id_commande
+                 ##### 1
+                 LEFT JOIN declinaison_telephone ON ligne_commande.declinaison_id = declinaison_telephone.id_declinaison
+                 LEFT JOIN couleur ON declinaison_telephone.couleur_id = couleur.id_couleur
                  WHERE ligne_commande.commande_id = %s'''
         mycursor.execute(sql_telephones, (id_commande,))
         telephones_commande = mycursor.fetchall()
