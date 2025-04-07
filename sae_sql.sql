@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS liste_envie;
 DROP TABLE IF EXISTS commentaire;
 DROP TABLE IF EXISTS note;
 DROP TABLE IF EXISTS historique;
@@ -8,6 +7,7 @@ DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS adresse;
 DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS declinaison_telephone;
+DROP TABLE IF EXISTS liste_envie;
 DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS telephone;
@@ -50,17 +50,10 @@ CREATE TABLE telephone (
 CREATE TABLE declinaison_telephone (
     id_declinaison INT AUTO_INCREMENT,
     telephone_id INT,
-<<<<<<< HEAD
     taille VARCHAR(50),
     stock INT,
     prix DECIMAL(15,2),
     couleur_id INT,
-=======
-    taille VARCHAR(20),
-    couleur_id INT,
-    stock INT,
-    prix DECIMAL(15,2),
->>>>>>> 7722dc224977c1b648e1e542fcd1bb68200cd7b4
     PRIMARY KEY(id_declinaison),
     FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
     FOREIGN KEY (couleur_id) REFERENCES couleur(id_couleur)
@@ -89,7 +82,6 @@ CREATE TABLE ligne_panier (
     declinaison_id INT,
     date_ajout DATETIME,
     quantite INT,
-    declinaison_id INT,
     prix_unitaire DECIMAL(15,2),
     PRIMARY KEY (utilisateur_id, telephone_id, date_ajout),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
@@ -130,9 +122,11 @@ CREATE TABLE ligne_commande (
     telephone_id int(11),
     prix decimal(15,2),
     quantite int(11),
+    declinaison_id INT,
     PRIMARY KEY (commande_id, telephone_id),
     FOREIGN KEY (commande_id) REFERENCES commande(id_commande),
-    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone)
+    FOREIGN KEY (telephone_id) REFERENCES telephone(id_telephone),
+    FOREIGN KEY (declinaison_id) REFERENCES declinaison_telephone(id_declinaison)
 );
 
 CREATE TABLE paiement (
@@ -269,7 +263,10 @@ INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_a
     'ROLE_client','client','1'),
     (3,'client2','client2@client2.fr',
     'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
-    'ROLE_client','client2','1');
+    'ROLE_client','client2','1'),
+    (4,'trump','trump@trump.com',
+    'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
+    'ROLE_client','Donald Trump','1');
 
 INSERT INTO etat(libelle) VALUES
     ('En cours de traitement'),
@@ -285,24 +282,28 @@ INSERT INTO ligne_panier (utilisateur_id, telephone_id, declinaison_id, date_ajo
 INSERT INTO adresse (utilisateur_id, nom, rue, ville, code_postal, pays, valide, favori) VALUES
     (1,'admin', '10 Rue de la Paix', 'Paris', '75001', 'France', 1, 1),
     (2,'client', '25 Avenue des Champs', 'Lyon', '69002', 'France', 1, 1),
-    (3,'client2', '5 Boulevard Haussmann', 'Marseille', '13008', 'France', 1, 1);
+    (3,'client2', '5 Boulevard Haussmann', 'Marseille', '13008', 'France', 1, 1),
+    (4,'Donald Trump', '1 Avenue des Champs-Élysées', 'Paris', '75008', 'France', 1, 1);
 
 INSERT INTO commande (date_achat, adresse_facturation_id, adresse_livraison_id, utilisateur_id, etat_id) VALUES
     ('2025-02-01 14:30:00', 1, 1, 2, 1),
     ('2025-02-05 09:15:00', 2, 2, 1, 2),
-    ('2025-02-10 18:45:00', 3, 3, 3, 3);
+    ('2025-02-10 18:45:00', 3, 3, 3, 3),
+    ('2025-02-15 10:30:00', 4, 4, 4, 1);
 
-INSERT INTO ligne_commande (commande_id, telephone_id, quantite, prix) VALUES
-    (1, 1, 2, 909.00),
-    (1, 4, 1, 809.00),
-    (2, 6, 3, 1199.00),
-    (3, 9, 1, 1099.00),
-    (3, 12, 2, 1449.00);
+INSERT INTO ligne_commande (commande_id, telephone_id, quantite, prix, declinaison_id) VALUES
+    (1, 1, 2, 909.00, 1),
+    (1, 4, 1, 809.00, 1),
+    (2, 6, 3, 1199.00, 1),
+    (3, 9, 1, 1099.00, 1),
+    (3, 12, 2, 1449.00, 1),
+    (4, 7, 1, 1399.00, 1);
 
 INSERT INTO paiement (commande_id, montant, date_paiement, methode, statut) VALUES
     (1, 1718.00, '2025-02-01 15:00:00', 'Carte Bancaire', 'Validé'),
     (2, 3597.00, '2025-02-05 10:00:00', 'PayPal', 'En attente'),
-    (3, 3997.00, '2025-02-10 19:00:00', 'Virement', 'Refusé');
+    (3, 3997.00, '2025-02-10 19:00:00', 'Virement', 'Refusé'),
+    (4, 1399.00, '2025-02-15 11:00:00', 'Carte Bancaire', 'Validé');
 
 INSERT INTO historique (utilisateur_id, telephone_id, date_consultation) VALUES
     (1, 1, '2025-01-01 12:00:00'),

@@ -75,11 +75,10 @@ def client_panier_add():
         declinaison = mycursor.fetchone()
         
         if declinaison and declinaison['stock'] >= int(quantite):
-            # Mettre à jour le stock de la déclinaison
             sql = "UPDATE declinaison_telephone SET stock = stock - %s WHERE id_declinaison = %s"
             mycursor.execute(sql, (quantite, id_declinaison))
             
-            # Récupérer les infos complètes de la déclinaison pour le panier
+            # Récupérer les infos de la déclinaison pour le panier
             sql = '''
                 SELECT t.id_telephone, t.nom_telephone, d.taille, c.libelle_couleur, d.prix
                 FROM declinaison_telephone d
@@ -97,18 +96,18 @@ def client_panier_add():
             if info_declinaison['libelle_couleur']:
                 nom_complet += f" - {info_declinaison['libelle_couleur']}"
                 
-            # Utiliser le prix de la déclinaison, pas celui du téléphone de base
+            # Utiliser le prix de la d
             prix_declinaison = info_declinaison['prix']
         else:
             flash(u'Stock insuffisant pour cette déclinaison')
             return redirect('/client/telephone/show')
     else:
-        # Vérifier le stock du téléphone principal
+        # stock principal
         sql = "SELECT stock FROM telephone WHERE id_telephone = %s"
         mycursor.execute(sql, (id_telephone,))
         stock_telephone = mycursor.fetchone()
         if stock_telephone and stock_telephone['stock'] >= int(quantite):
-            # Mettre à jour le stock du téléphone
+            #  stock du téléphone
             sql = "UPDATE telephone SET stock = stock - %s WHERE id_telephone = %s"
             mycursor.execute(sql, (quantite, id_telephone))
         else:
