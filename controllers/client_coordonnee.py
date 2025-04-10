@@ -84,6 +84,7 @@ def client_coordonnee_delete_adresse():
     mycursor.execute(sql, (id_adresse, id_adresse))
     adresses=mycursor.fetchall()
 
+
     if adresses:
         sql = "UPDATE adresse SET favori = 0, valide = 0 WHERE id_adresse = %s"
         mycursor.execute(sql, id_adresse)

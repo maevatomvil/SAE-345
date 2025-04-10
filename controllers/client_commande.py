@@ -53,13 +53,18 @@ def client_commande_valide():
     mycursor.execute(sql, id_client)
     adresses = mycursor.fetchall()
 
+    sql = '''SELECT id_adresse FROM adresse WHERE utilisateur_id = %s AND favori = 1'''
+    mycursor.execute(sql, id_client)
+    adresse_fav = mycursor.fetchone()
+    print(adresse_fav)
+
     return render_template('client/boutique/panier_validation_adresses.html'
                            , adresses=adresses
                            , telephone_panier=telephone_panier
                            , prix_total=prix_total
                            , nombre_articles=nombre_articles
                            , validation=1
-                           #, id_adresse_fav=id_adresse_fav
+                           , id_adresse_fav=adresse_fav['id_adresse']
                            )
 
 
